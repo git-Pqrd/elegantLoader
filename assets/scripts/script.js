@@ -221,50 +221,53 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+function restartAnimation() {
+  const iframe = document.getElementById("previewFrame");
+
+  try {
+    // Get the iframe document
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+    // Store the current content
+    const styleContent = iframeDoc.querySelector("style")?.innerHTML || "";
+    const bodyContent = iframeDoc.body.innerHTML;
+
+    // Recreate the document content
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            ${styleContent}
+          </style>
+        </head>
+        <body>
+          ${bodyContent}
+        </body>
+      </html>
+    `);
+    iframeDoc.close();
+
+    // Force a repaint (optional, but can help with some animations)
+    iframe.style.display = "none";
+    iframe.offsetHeight; // Force reflow
+    iframe.style.display = "";
+  } catch (error) {
+    console.error("Error restarting iframe:", error);
+
+    // Alternative method: reload the iframe src
+    if (iframe.src) {
+      iframe.src = iframe.src;
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const restartAnimationButton = document.getElementById(
     "restart-animation-button"
   );
-
   restartAnimationButton.addEventListener("click", function () {
-    const iframe = document.getElementById("previewFrame");
-
-    try {
-      // Get the iframe document
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-      // Store the current content
-      const styleContent = iframeDoc.querySelector("style")?.innerHTML || "";
-      const bodyContent = iframeDoc.body.innerHTML;
-
-      // Recreate the document content
-      iframeDoc.open();
-      iframeDoc.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <style>
-              ${styleContent}
-            </style>
-          </head>
-          <body>
-            ${bodyContent}
-          </body>
-        </html>
-      `);
-      iframeDoc.close();
-
-      // Force a repaint (optional, but can help with some animations)
-      iframe.style.display = "none";
-      iframe.offsetHeight; // Force reflow
-      iframe.style.display = "";
-    } catch (error) {
-      console.error("Error restarting iframe:", error);
-
-      // Alternative method: reload the iframe src
-      if (iframe.src) {
-        iframe.src = iframe.src;
-      }
-    }
+    restartAnimation();
   });
 });

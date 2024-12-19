@@ -43,7 +43,8 @@ flex flex-col md:flex-row-reverse">
             ?>
 
             <button id="restart-animation-button"
-                class="absolute bottom-4 right-4 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-sm">
+                class="absolute bottom-4 right-4 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-sm flex items-center justify-center">
+                <img src="<?php echo plugin_dir_url(__FILE__) . '../assets/icons/refresh.svg'; ?>" alt="Restart Animation" class="w-4 h-4 mr-2">
                 Restart Animation
             </button>
         </div>
