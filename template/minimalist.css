@@ -1,0 +1,41 @@
+#elegant-loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff; /* Pure white for a clean, minimalist look */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  animation: minimalistFadeOut 3s forwards;
+  flex-direction: column;
+}
+
+.elegant-loader-svg {
+  width: 50%;
+  height: 50%;
+  animation: minimalistFadeIn 1s forwards infinite alternate;
+}
+
+@keyframes minimalistFadeOut {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes minimalistFadeIn {
+  0% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
+}

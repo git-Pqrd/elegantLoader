@@ -1,0 +1,61 @@
+/* Container for the loader */
+#elegant-loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  flex-direction: column;
+  background: linear-gradient(
+    45deg,
+    #f5f5f5,
+    #e0e0e0
+  ); /* Simple gradient background */
+  animation: fadeOut 3s forwards;
+}
+
+/* SVG Styling */
+.elegant-loader-svg {
+  width: 45%;
+  height: 45%;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+/* Path animation for SVG */
+.elegant-loader-svg path {
+  stroke: #333; /* Dark gray stroke */
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: writePath 2s ease-in-out forwards;
+}
+
+/* Writing path animation */
+@keyframes writePath {
+  0% {
+    stroke-dashoffset: 300;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Smooth fade-out animation for the loader */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

@@ -1,0 +1,68 @@
+#elegant-loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #ffdede, #dfffe0, #dee9ff);
+  background-size: 200% 200%;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  animation: pastelFadeOut 3s forwards,
+    pastelBackgroundShift 5s infinite alternate;
+  flex-direction: column;
+}
+
+.elegant-loader-svg {
+  width: 50%;
+  height: 50%;
+  animation: pastelScale 2s infinite alternate, pastelFadeIn 1s forwards;
+}
+
+.elegant-loader-content {
+  animation: pastelFadeIn 1s forwards;
+}
+
+@keyframes pastelScale {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pastelBackgroundShift {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes pastelFadeIn {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pastelFadeOut {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

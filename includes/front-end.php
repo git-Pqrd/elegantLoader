@@ -2,11 +2,18 @@
 
 function elegant_loader_display_svg()
 {
-    $svg_url = get_option('elegant_loader_svg', '');
-    if ($svg_url) {
-        echo '<div class="elegant-loader">';
-        echo '<img src="' . esc_url($svg_url) . '" alt="Loading...">';
-        echo '</div>';
+    if (get_option('elegant_loader_svg')) {
+        $svg_url = get_option('elegant_loader_svg', '');
+        if ($svg_url) {
+            include_once plugin_dir_path(__FILE__) . '../serving/elegant-loader.php';
+        }
     }
 }
 add_action('wp_footer', 'elegant_loader_display_svg');
+
+function elegant_loader_enqueue_styles()
+{
+    wp_enqueue_style('elegant-loader-custom-css', plugin_dir_url(__FILE__) . '../serving/elegant-loader.css');
+    wp_enqueue_script('elegant-loader-custom-js', plugin_dir_url(__FILE__) . '../serving/elegant-loader.js');
+}
+add_action('wp_enqueue_scripts', 'elegant_loader_enqueue_styles');

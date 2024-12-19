@@ -17,11 +17,3 @@ if (!defined('ABSPATH')) {
 // Include required files.
 include_once plugin_dir_path(__FILE__) . 'includes/admin.php';
 include_once plugin_dir_path(__FILE__) . 'includes/front-end.php';
-
-// Enqueue styles and scripts.
-function elegant_loader_enqueue_assets()
-{
-    wp_enqueue_style('elegant-loader-styles', plugin_dir_url(__FILE__) . 'assets/css/styles.css');
-    wp_enqueue_script('elegant-loader-script', plugin_dir_url(__FILE__) . 'assets/js/script.js', array('jquery'), '1.0', true);
-}
-add_action('wp_enqueue_scripts', 'elegant_loader_enqueue_assets');

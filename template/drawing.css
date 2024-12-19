@@ -1,0 +1,52 @@
+#elegant-loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  animation: fadeOut 4s forwards;
+  flex-direction: column;
+}
+
+.elegant-loader-svg {
+  width: 50%;
+  height: 50%;
+  animation: fadeIn 1s forwards;
+}
+
+.elegant-loader-svg path {
+  fill: none;
+  stroke: #333;
+  stroke-width: 2px;
+  stroke-dasharray: 200; /* Adjust based on path length */
+  stroke-dashoffset: 200;
+  animation: drawLine 2s ease-in-out forwards infinite alternate;
+}
+
+@keyframes drawLine {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
