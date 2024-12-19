@@ -3,6 +3,9 @@
 function elegant_loader_display_svg()
 {
     if (get_option('elegant_loader_svg')) {
+        if (isset($_GET['elegant_loader']) && $_GET['elegant_loader'] === 'false') {
+            return;
+        }
         $svg_url = get_option('elegant_loader_svg', '');
         if ($svg_url) {
             include_once plugin_dir_path(__FILE__) . '../serving/elegant-loader.php';

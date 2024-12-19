@@ -1,6 +1,10 @@
 <?php
 
-// Add an admin menu for Elegant Loader.
+/**
+ * Adds the Elegant Loader menu item to the WordPress admin menu.
+ *
+ * @return void
+ */
 function elegant_loader_add_admin_menu()
 {
     add_menu_page(
@@ -15,7 +19,12 @@ function elegant_loader_add_admin_menu()
 }
 add_action('admin_menu', 'elegant_loader_add_admin_menu');
 
-// Enqueue admin styles
+/**
+ * Enqueues the necessary CSS and JavaScript files for the admin interface.
+ * Also localizes JavaScript variables for AJAX functionality.
+ *
+ * @return void
+ */
 function elegant_loader_admin_scripts()
 {
     wp_enqueue_style('elegant-loader-css', plugin_dir_url(__FILE__) . '../assets/scripts/styles.css');
@@ -29,13 +38,31 @@ function elegant_loader_admin_scripts()
 }
 add_action('admin_enqueue_scripts', 'elegant_loader_admin_scripts');
 
-// Admin page callback.
+/**
+ * Enqueues the WordPress media uploader script.
+ *
+ * @return void
+ */
+function enqueue_media_uploader_script()
+{
+    wp_enqueue_media();
+}
+add_action('admin_enqueue_scripts', 'enqueue_media_uploader_script');
+
+/**
+ * Renders the admin page content.
+ * Displays different templates based on whether an SVG logo is already uploaded.
+ *
+ * @return void
+ */
 function elegant_loader_admin_page()
 {
 ?>
     <div class="elegant-admin">
-        <?php if (get_option('elegant_loader_svg')) : ?>
+        <?php if (get_option('elegant_loader_svg') && !get_option('elegant_loader_style')) : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-with-logo.php'; ?>
+        <?php elseif (get_option('elegant_loader_svg') && get_option('elegant_loader_style')) : ?>
+            <?php include_once plugin_dir_path(__FILE__) . 'admin-editor.php'; ?>
         <?php else : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-no-logo.php'; ?>
         <?php endif; ?>
@@ -43,7 +70,12 @@ function elegant_loader_admin_page()
 <?php
 }
 
-// Handle SVG uploads via AJAX.
+/**
+ * Handles the AJAX request to update the SVG logo.
+ * Validates the nonce and required data before updating options.
+ *
+ * @return array Response array indicating success or failure
+ */
 function update_elegant_loader_svg()
 {
 
@@ -63,31 +95,14 @@ function update_elegant_loader_svg()
 
     wp_send_json_success(['success' => true]);
 }
-
-function remove_elegant_loader_svg()
-{
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'elegant_loader_upload')) {
-        return array('success' => false, 'data' => array('message' => 'Invalid nonce.'));
-    }
-
-    delete_option('elegant_loader_svg');
-    delete_option('elegant_loader_svg_id');
-    wp_send_json_success(['success' => true]);
-}
-
 add_action('wp_ajax_update_elegant_loader_svg', 'update_elegant_loader_svg');
-add_action('wp_ajax_remove_elegant_loader_svg', 'remove_elegant_loader_svg');
 
-
-// Enqueue media uploader script
-function enqueue_media_uploader_script()
-{
-    wp_enqueue_media();
-}
-add_action('admin_enqueue_scripts', 'enqueue_media_uploader_script');
-
-
-//
+/**
+ * Restricts file uploads to SVG files only.
+ *
+ * @param array $file The uploaded file information
+ * @return array Modified file array with error if not SVG
+ */
 function restrict_to_svg_upload($file)
 {
     $filetype = wp_check_filetype($file['name']);
@@ -100,9 +115,44 @@ function restrict_to_svg_upload($file)
     return $file;
 }
 add_filter('wp_handle_upload_prefilter', 'restrict_to_svg_upload');
+
+/**
+ * Adds SVG to the list of allowed mime types for upload.
+ *
+ * @param array $mimes Current allowed mime types
+ * @return array Modified mime types array including SVG
+ */
 function allow_svg_upload($mimes)
 {
     $mimes['svg'] = 'image/svg+xml';
     return $mimes;
 }
 add_filter('upload_mimes', 'allow_svg_upload');
+
+
+/**
+ * Handles the AJAX request to remove the SVG logo.
+ * Validates the nonce before deleting options.
+ *
+ * @return array Response array indicating success or failure
+ */
+function remove_elegant_loader_options()
+{
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'elegant_loader_upload')) {
+        return array('success' => false, 'data' => array('message' => 'Invalid nonce.'));
+    }
+
+    delete_option('elegant_loader_svg');
+    delete_option('elegant_loader_svg_id');
+    delete_option('elegant_loader_style');
+    wp_send_json_success(['success' => true]);
+}
+add_action('wp_ajax_remove_elegant_loader_options', 'remove_elegant_loader_options');
+
+function upload_elegant_loader_css()
+{
+    $style = $_POST['data']['style'];
+    update_option('elegant_loader_style', $style);
+    wp_send_json_success(['success' => true]);
+}
+add_action('wp_ajax_upload_elegant_loader_css', 'upload_elegant_loader_css');

@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
         url: ajaxurl,
         type: "POST",
         data: {
-          action: "remove_elegant_loader_svg",
+          action: "remove_elegant_loader_options",
           nonce: elegant_loader_vars.nonce,
         },
         success: function (response) {
@@ -146,4 +146,125 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+});
+
+function previewStyle(style) {
+  const continueCTA = document.getElementById("animation-option-continue");
+  const animationOption = document.getElementById("animation-option-" + style);
+  if (animationOption) {
+    if (animationOption.classList.contains("selected")) {
+      animationOption.classList.remove("selected");
+      continueCTA.classList.add("hidden");
+    } else {
+      Array.from(document.getElementsByClassName("animation-option")).forEach(
+        (option) => {
+          if (option !== animationOption) {
+            option.classList.remove("selected");
+          }
+        }
+      );
+      animationOption.classList.add("selected");
+      window.selectedStyle = style;
+      continueCTA.classList.remove("hidden");
+      continueCTA.scrollIntoView({ behavior: "smooth" });
+    }
+  } else {
+    console.error("Animation option not found for style:", style);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const continueCTA = document.getElementById(
+    "animation-option-continue-button"
+  );
+  continueCTA.addEventListener("click", function (event) {
+    event.preventDefault();
+    jQuery.ajax({
+      url: ajaxurl,
+      type: "POST",
+      data: {
+        action: "upload_elegant_loader_css",
+        nonce: elegant_loader_vars.nonce,
+        data: {
+          style: window.selectedStyle,
+        },
+      },
+      success: function (response) {
+        continueCTA.classList.remove("loading");
+        console.log("AJAX Response:", response);
+        // Parse response if it's a string
+        if (typeof response === "string") {
+          try {
+            response = JSON.parse(response);
+          } catch (e) {
+            console.error("Failed to parse response:", e);
+          }
+        }
+
+        if (
+          response &&
+          (response.success === true || response.success === "true")
+        ) {
+          window.location.reload();
+        } else {
+          alert(
+            response.data?.message || "Error uploading CSS. Please try again."
+          );
+        }
+      },
+      error: function (xhr, status, error) {
+        continueCTA.classList.remove("loading");
+        console.error("AJAX Error:", { xhr, status, error }); // Log error details
+        alert("Error uploading CSS. Please check console for details.");
+      },
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const restartAnimationButton = document.getElementById(
+    "restart-animation-button"
+  );
+
+  restartAnimationButton.addEventListener("click", function () {
+    const iframe = document.getElementById("previewFrame");
+
+    try {
+      // Get the iframe document
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+      // Store the current content
+      const styleContent = iframeDoc.querySelector("style")?.innerHTML || "";
+      const bodyContent = iframeDoc.body.innerHTML;
+
+      // Recreate the document content
+      iframeDoc.open();
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <style>
+              ${styleContent}
+            </style>
+          </head>
+          <body>
+            ${bodyContent}
+          </body>
+        </html>
+      `);
+      iframeDoc.close();
+
+      // Force a repaint (optional, but can help with some animations)
+      iframe.style.display = "none";
+      iframe.offsetHeight; // Force reflow
+      iframe.style.display = "";
+    } catch (error) {
+      console.error("Error restarting iframe:", error);
+
+      // Alternative method: reload the iframe src
+      if (iframe.src) {
+        iframe.src = iframe.src;
+      }
+    }
+  });
 });

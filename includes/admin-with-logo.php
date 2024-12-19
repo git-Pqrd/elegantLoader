@@ -45,15 +45,14 @@
         // define all the styles of animations
         $styles = [
             'drawing',
-            'classy',
-            'minimalist',
             'pastel',
             'shaded',
-            'funky',
-            'retro',
             'energetic',
             'elegant',
+            'funky',
             'writing',
+            'classy',
+            'minimalist',
         ]; ?>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <?php foreach ($styles as $style) : ?>
@@ -66,8 +65,9 @@
                     continue;
                 endif; ?>
 
-                <div class="animation-option rounded-lg flex flex-col items-center">
-                    <div class="w-full h-48 bg-gray-300 mb-1 relative cursor-pointer">
+                <div id="animation-option-<?php echo $style; ?>"
+                    class="animation-option rounded-lg flex flex-col cursor-pointer items-center" onclick="previewStyle('<?php echo $style; ?>')">
+                    <div class="w-full h-48 bg-gray-300 mb-1 relative">
                         <img src="<?php echo plugin_dir_url(__FILE__) . '../template/' . $style . '.png'; ?>"
                             alt="<?php echo ucfirst($style); ?> Animation"
                             class="absolute inset-0 w-full h-full object-cover opacity-100 hover:opacity-0 transition-opacity duration-300">
@@ -78,6 +78,25 @@
                     <span class="text-primary text-xl w-full text-right"><?php echo ucfirst($style); ?></span>
                 </div>
             <?php endforeach; ?>
+            <a id="animation-option-pro"
+                href="https://elegantloader.pro"
+                target="_blank"
+                class="animation-option rounded-lg flex flex-col cursor-pointer items-center">
+                <div class="w-full h-48 bg-gray-300 mb-1 relative">
+                    <img src="<?php echo plugin_dir_url(__FILE__) . '../assets/img/pro-illustration.webp'; ?>"
+                        alt="ElegantLoader.pro"
+                        class="absolute inset-0 w-full h-full object-cover opacity-100">
+
+                </div>
+                <span class="text-primary text-xl w-full text-right">Get More with ElegantLoader.pro!</span>
+            </a>
         </div>
+    </div>
+
+    <div id="animation-option-continue" class="flex gap-4 mt-8 hidden">
+        <button id="animation-option-continue-button" type="submit" class="text-xl bg-primary hover:bg-primary-dark text-white p-2 mb-4 flex items-center gap-2 cursor-pointer hover:-translate-y-1 transition-colors duration-200 px-4 py-2 rounded-sm">
+            <img src="<?php echo plugin_dir_url(__FILE__) . '../assets/icons/right-arrow.svg'; ?>" alt="arrow-right" class="w-auto h-4">
+            Nice! Click here to continue
+        </button>
     </div>
 </div>

@@ -12,3 +12,22 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+.animation-option {
+  opacity: 0.7;
+  filter: grayscale(10%);
+}
+.animation-option:hover {
+  opacity: 1;
+  filter: grayscale(0%);
+}
+.animation-option.selected {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+
+  span {
+    font-weight: 900;
+  }
+}
