@@ -1295,6 +1295,10 @@ video {
     width: 66.666667%;
   }
 
+  .lg\:flex-row-reverse {
+    flex-direction: row-reverse;
+  }
+
   .lg\:p-8 {
     padding: 2rem;
   }

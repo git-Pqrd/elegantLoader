@@ -49,6 +49,17 @@ function enqueue_media_uploader_script()
 }
 add_action('admin_enqueue_scripts', 'enqueue_media_uploader_script');
 
+/** 
+ * Enque the editor script if the user is on the editor page
+ */
+function enqueue_editor_script()
+{
+    if (isset($_GET['page']) && $_GET['page'] === 'elegant-loader') {
+        wp_enqueue_script('elegant-loader-editor', plugin_dir_url(__FILE__) . '../assets/scripts/editor.js', array('jquery'), '1.0', true);
+    }
+}
+add_action('admin_enqueue_scripts', 'enqueue_editor_script');
+
 /**
  * Renders the admin page content.
  * Displays different templates based on whether an SVG logo is already uploaded.

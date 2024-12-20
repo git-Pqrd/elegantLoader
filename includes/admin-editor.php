@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-white max-w-[2000px] mx-auto
-flex flex-col md:flex-row-reverse">
+flex flex-col lg:flex-row-reverse">
     <!-- Preview Column -->
-    <div class="w-full md:w-1/2 lg:w-2/3 md:p-2 lg:p-8 flex justify-center items-start">
+    <div class="w-full lg:w-2/3 md:p-2 lg:p-8 flex justify-center items-start">
         <div class="resize relative w-full max-h-[80%] md:h-96 lg:h-[800px] max-w-7xl bg-white border-primary-light border-solid border-l-4 rounded-sm overflow-hidden">
             <?php
             $path = plugin_dir_path(__FILE__) . '../serving/elegant-loader.php';
@@ -51,10 +51,10 @@ flex flex-col md:flex-row-reverse">
     </div>
 
     <!-- Controls Column -->
-    <div class="w-full md:w-1/2 lg:w-1/3 p-4 py-8 flex flex-col justify-start items-start">
+    <form onChange="handleChange()" id="elegant-options" class="w-full lg:w-1/3 p-4 py-8 flex flex-col justify-start items-start">
         <h1 class="text-4xl font-black text-primary">Elegant Loader</h1>
         <p class="text-lg font-bold text-almost-black mb-4 border-b-4 border-primary-light pb-4">Customize your elegant loader to fit your brand</p>
-        <div class="flex flex-col gap-4 p-4 w-full h-full">
+        <div class="flex flex-col gap-4 p-4 w-full h-full ">
             <div class="flex items-center justify-between w-full">
                 <label>Background Color</label>
                 <input type="color" class="h-8 w-16" value="#000000" />
@@ -85,5 +85,5 @@ flex flex-col md:flex-row-reverse">
                 <input type="color" class="h-8 w-16" value="#999999" />
             </div>
         </div>
-    </div>
+    </form>
 </div>
