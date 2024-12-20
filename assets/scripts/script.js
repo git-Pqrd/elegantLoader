@@ -220,3 +220,18 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const goToEditorButton = document.getElementById("go-to-editor-button");
+  if (goToEditorButton) {
+    goToEditorButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      console.log(window.location.href);
+      window.location.href =
+        window.location.href.split("?")[0] +
+        "?" +
+        window.location.href.split("?")[1] +
+        "&should_show_editor=true";
+    });
+  }
+});

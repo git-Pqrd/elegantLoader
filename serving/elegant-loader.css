@@ -1,0 +1,14 @@
+#elegant-loader-container { position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; background: linear-gradient(135deg, rgb(243, 156, 18), rgb(241, 196, 15), rgb(230, 126, 34)) 0% 0% / 300% 300% rgb(206, 59, 59); z-index: 9999; display: flex; justify-content: center; align-items: center; overflow: hidden; animation: 3s ease 0s 1 normal forwards running geometricFadeOut, 4s linear 0s infinite normal none running geometricShimmer; flex-direction: column; }
+.elegant-loader-svg { width: 60%; height: 60%; animation: 1s ease 0s 1 normal forwards running geometricFadeIn; }
+@keyframes geometricShimmer { 
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+@keyframes geometricFadeIn { 
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes geometricFadeOut { 
+  0%, 50% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}

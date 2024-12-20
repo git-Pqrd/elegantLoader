@@ -49,6 +49,12 @@ const allowedProperties = {
   ],
   advanced: [
     {
+      property: "background-gradient",
+      label: "Background Gradient",
+      type: "text",
+      category: "appearance",
+    },
+    {
       property: "border-color",
       label: "Border Color",
       type: "color",
@@ -362,7 +368,9 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href =
           window.location.href.split("?")[0] +
           "?" +
-          window.location.href.split("?")[1];
+          window.location.href
+            .split("?")[1]
+            .replace("should_show_editor=true", "");
         // Parse response if it's a string
         if (typeof response === "string") {
           try {

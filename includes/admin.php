@@ -70,12 +70,13 @@ function elegant_loader_admin_page()
 {
 ?>
     <div class="elegant-admin">
-        <?php $css_exists = file_exists(plugin_dir_path(__FILE__) . '../serving/elegant-loader.css'); ?>
+        <?php $should_show_editor =
+            !file_exists(plugin_dir_path(__FILE__) . '../serving/elegant-loader.css') || isset($_GET['should_show_editor']); ?>
         <?php if (get_option('elegant_loader_svg') && !get_option('elegant_loader_style')) : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-with-logo.php'; ?>
-        <?php elseif (get_option('elegant_loader_svg') && get_option('elegant_loader_style') && !$css_exists) : ?>
+        <?php elseif (get_option('elegant_loader_svg') && get_option('elegant_loader_style') && $should_show_editor) : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-editor.php'; ?>
-        <?php elseif (get_option('elegant_loader_style') && $css_exists) : ?>
+        <?php elseif (get_option('elegant_loader_style') && !$should_show_editor) : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-with-style.php'; ?>
         <?php else : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-no-logo.php'; ?>
@@ -167,7 +168,8 @@ add_action('wp_ajax_remove_elegant_loader_options', 'remove_elegant_loader_optio
 function upload_elegant_loader_css()
 {
     $style = $_POST['data']['style'];
-    update_option('elegant_loader_style', $style);
+    $elegant_loader_file = plugin_dir_path(__FILE__) . '../template/' . $style . '.css';
+    update_option('elegant_loader_style', $elegant_loader_file);
     wp_send_json_success(['success' => true]);
 }
 add_action('wp_ajax_upload_elegant_loader_css', 'upload_elegant_loader_css');
@@ -180,6 +182,7 @@ function save_elegant_loader_css()
     $style = $_POST['data']['style'];
     $elegant_loader_file = plugin_dir_path(__FILE__) . '../serving/elegant-loader.css';
     file_put_contents($elegant_loader_file, $style);
+    update_option('elegant_loader_style', $elegant_loader_file);
     wp_send_json_success(['success' => true]);
 }
 add_action('wp_ajax_save_elegant_loader_css', 'save_elegant_loader_css');
