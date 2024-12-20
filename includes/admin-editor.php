@@ -3,7 +3,7 @@ flex flex-col lg:flex-row-reverse">
     <!-- Preview Column -->
     <div class="w-full lg:w-2/3 md:p-2 lg:p-8 flex justify-center items-start">
         <div class="resize relative w-full min-h-[400px]
-    max-h-[80%] md:h-96 lg:h-[800px] max-w-7xl bg-white border-primary-light border-solid border-l-4 rounded-sm overflow-hidden">
+    max-h-[80%] md:h-96 lg:h-[800px] max-w-7xl bg-white border-primary-light border-solid border-l-4 pl-4 rounded-sm overflow-hidden">
             <?php include_once plugin_dir_path(__FILE__) . 'logo-iframe.php'; ?>
         </div>
     </div>

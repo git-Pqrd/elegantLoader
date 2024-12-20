@@ -5,7 +5,8 @@
             <h1 class="text-2xl md:text-3xl font-bold text-primary">ElegantLoader</h1>
             <p class="w-full max-w-4xl text-2xl md:text-3xl text-almost-black font-black">Congrats, your Loader looks awesome!</p>
         </div>
-        <div id="logo-container" class="rounded-lg p-4 w-full min-h-[300px] h-auto max-h-[400px] md:w-1/2 lg:w-3/4 mx-4 grid grid-cols-1 grid-rows-1 overflow-visible">
+        <div id="logo-container" class="rounded-lg p-4 w-full  h-auto max-h-[400px] min-h-[300px]
+            md:w-1/2 lg:w-3/4 mx-4 grid grid-cols-1 grid-rows-1 overflow-visible">
             <?php include_once plugin_dir_path(__FILE__) . 'logo-iframe.php'; ?>
         </div>
         <!-- Upload Button -->

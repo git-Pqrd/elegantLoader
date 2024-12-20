@@ -5,7 +5,7 @@ if (file_exists($path)) {
     if (!empty($svg_url) && !empty(get_option('elegant_loader_style'))) {
 ?>
         <iframe
-            id="previewFrame" style="width:100%; height:100%; min-height:400px;">
+            id="previewFrame" style="width:100%; height:100%;">
         </iframe>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
