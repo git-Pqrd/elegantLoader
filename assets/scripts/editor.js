@@ -1,5 +1,6 @@
 let currentStyleContent = "";
-let isAdvanced = true;
+let initialStyle = "";
+let isAdvanced = false;
 
 const allowedProperties = {
   basic: [
@@ -32,6 +33,18 @@ const allowedProperties = {
       label: "Border Radius",
       type: "text",
       category: "appearance",
+    },
+    {
+      property: "stroke",
+      label: "Stroke Color",
+      type: "color",
+      category: "svg",
+    },
+    {
+      property: "fill",
+      label: "Fill Color",
+      type: "color",
+      category: "svg",
     },
   ],
   advanced: [
@@ -140,18 +153,6 @@ const allowedProperties = {
       property: "stroke-width",
       label: "Stroke Width",
       type: "text",
-      category: "svg",
-    },
-    {
-      property: "stroke",
-      label: "Stroke Color",
-      type: "color",
-      category: "svg",
-    },
-    {
-      property: "fill",
-      label: "Fill Color",
-      type: "color",
       category: "svg",
     },
     {
@@ -315,10 +316,12 @@ function restartIframe(iframe) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  currentStyleContent =
+  initialStyle =
     document
       .getElementById("previewFrame")
       .contentDocument.querySelector("style")?.innerHTML || "";
+  // Set the initial style content to the initial style
+  currentStyleContent = initialStyle;
   generateOptions(currentStyleContent);
 });
 
@@ -340,9 +343,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener("DOMContentLoaded", function () {
   const saveButton = document.getElementById("save-button");
-  saveButton?.addEventListener("click", function (event) {
+  saveButton?.addEventListener(["click"], function (event) {
     event.preventDefault();
-    console.log("save");
+    saveButton.classList.add("loading");
+    jQuery.ajax({
+      url: ajaxurl,
+      type: "POST",
+      data: {
+        action: "save_elegant_loader_css",
+        nonce: elegant_loader_vars.nonce,
+        data: {
+          style: currentStyleContent,
+        },
+      },
+      success: function (response) {
+        saveButton.classList.remove("loading");
+        alert("The loader has been saved successfully");
+        window.location.href =
+          window.location.href.split("?")[0] +
+          "?" +
+          window.location.href.split("?")[1];
+        // Parse response if it's a string
+        if (typeof response === "string") {
+          try {
+            response = JSON.parse(response);
+          } catch (e) {
+            console.error("Failed to parse response:", e);
+          }
+        }
+      },
+      error: function (xhr, status, error) {
+        saveButton.classList.remove("loading");
+        console.error("AJAX Error:", { xhr, status, error }); // Log error details
+        alert("Unable to save CSS. Please check console for details.");
+      },
+    });
   });
 });
 
@@ -389,7 +424,30 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-function resetLoader(style) {
-  currentStyleContent = style;
-  generateOptions(currentStyleContent);
-}
+document.addEventListener("DOMContentLoaded", function () {
+  const resetLoaderButton = document.getElementById("reset-loader-button");
+  resetLoaderButton?.addEventListener("click", function (e) {
+    e.preventDefault();
+    const iframe = document.getElementById("previewFrame");
+    if (
+      confirm(
+        "Are you sure you want to reset the loader? All changes will be lost."
+      )
+    ) {
+      currentStyleContent = initialStyle;
+      generateOptions(currentStyleContent);
+      restartIframe(iframe);
+    }
+  });
+});
+
+// Prevent form from submitting
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("elegant-options");
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      return false;
+    });
+  }
+});

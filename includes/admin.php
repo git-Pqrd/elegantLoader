@@ -70,10 +70,13 @@ function elegant_loader_admin_page()
 {
 ?>
     <div class="elegant-admin">
+        <?php $css_exists = file_exists(plugin_dir_path(__FILE__) . '../serving/elegant-loader.css'); ?>
         <?php if (get_option('elegant_loader_svg') && !get_option('elegant_loader_style')) : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-with-logo.php'; ?>
-        <?php elseif (get_option('elegant_loader_svg') && get_option('elegant_loader_style')) : ?>
+        <?php elseif (get_option('elegant_loader_svg') && get_option('elegant_loader_style') && !$css_exists) : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-editor.php'; ?>
+        <?php elseif (get_option('elegant_loader_style') && $css_exists) : ?>
+            <?php include_once plugin_dir_path(__FILE__) . 'admin-with-style.php'; ?>
         <?php else : ?>
             <?php include_once plugin_dir_path(__FILE__) . 'admin-no-logo.php'; ?>
         <?php endif; ?>
@@ -156,6 +159,7 @@ function remove_elegant_loader_options()
     delete_option('elegant_loader_svg');
     delete_option('elegant_loader_svg_id');
     delete_option('elegant_loader_style');
+    wp_delete_file(plugin_dir_path(__FILE__) . '../serving/elegant-loader.css');
     wp_send_json_success(['success' => true]);
 }
 add_action('wp_ajax_remove_elegant_loader_options', 'remove_elegant_loader_options');
@@ -167,3 +171,15 @@ function upload_elegant_loader_css()
     wp_send_json_success(['success' => true]);
 }
 add_action('wp_ajax_upload_elegant_loader_css', 'upload_elegant_loader_css');
+
+function save_elegant_loader_css()
+{
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'elegant_loader_upload')) {
+        return array('success' => false, 'data' => array('message' => 'Invalid nonce.'));
+    }
+    $style = $_POST['data']['style'];
+    $elegant_loader_file = plugin_dir_path(__FILE__) . '../serving/elegant-loader.css';
+    file_put_contents($elegant_loader_file, $style);
+    wp_send_json_success(['success' => true]);
+}
+add_action('wp_ajax_save_elegant_loader_css', 'save_elegant_loader_css');

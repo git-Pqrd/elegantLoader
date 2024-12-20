@@ -6,8 +6,9 @@ function elegant_loader_display_svg()
         if (isset($_GET['elegant_loader']) && $_GET['elegant_loader'] === 'false') {
             return;
         }
+        $css_exists = file_exists(plugin_dir_path(__FILE__) . '../serving/elegant-loader.css');
         $svg_url = get_option('elegant_loader_svg', '');
-        if ($svg_url) {
+        if ($svg_url && $css_exists) {
             include_once plugin_dir_path(__FILE__) . '../serving/elegant-loader.php';
         }
     }

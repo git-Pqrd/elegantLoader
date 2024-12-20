@@ -52,7 +52,7 @@ flex flex-col lg:flex-row-reverse">
     </div>
 
     <!-- Controls Column -->
-    <form id="elegant-options" class="w-full lg:w-1/3 p-4 py-8 flex flex-col justify-start items-start">
+    <div id="elegant-options" class="w-full lg:w-1/3 p-4 py-8 flex flex-col justify-start items-start">
         <div class="flex flex-row justify-between items-end gap-4 mb-4">
             <h1 class="text-4xl font-black text-primary">Elegant Loader</h1>
             <!-- Advanced Mode -->
@@ -72,12 +72,12 @@ flex flex-col lg:flex-row-reverse">
                 Save the loader
             </button>
 
-            <button onClick="resetLoader(<?php echo get_plugin_files(__FILE__) . '../template/' . get_option('elegant_loader_style') . '.css'; ?>)"
+            <button id="reset-loader-button"
                 class="bg-light-red text-white px-4 py-2 rounded-sm flex items-center justify-center">
                 Reset the loader
             </button>
         </div>
-    </form>
+    </div>
 
 
 </div>
