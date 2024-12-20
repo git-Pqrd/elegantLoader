@@ -29,32 +29,24 @@
     <div class="flex flex-col gap-4">
         <h2 class="text-2xl md:text-3xl font-bold text-primary mt-8">Where should we show the loader?</h2>
         <p class="text-lg text-almost-black">Select the pages where you want to show the loader</p>
-        <div class="flex flex-row gap-4">
-            <select name="pages" id="pages" class="w-full h-full">
-                <?php foreach (get_pages() as $page) : ?>
-                    <option value="<?php echo $page->ID; ?>" multiple><?php echo $page->post_title; ?></option>
-                <?php endforeach; ?>
-                <?php foreach (get_posts() as $post) : ?>
-                    <option value="<?php echo $post->ID; ?>" multiple><?php echo $post->post_title; ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
 
-        <p class="text-lg text-almost-black">Select when we should show the loader</p>
-        <div class="flex flex-row gap-4">
-            <select name="pages" id="pages" class="w-full h-full">
-                <option value="on-every-visit">On every visit</option>
-                <option value="once-per-session">Once per session</option>
-                <option value="once-per-page">Once per page</option>
-                <option value="on-every-visit-and-once-per-session">On every visit and once per session</option>
-                <option value="never">Never</option>
-            </select>
-        </div>
 
-        <button class="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer
+    </div>
+
+    <p class="text-lg text-almost-black">Select when we should show the loader</p>
+    <div class="flex flex-row gap-4">
+        <select name="pages" id="pages" class="w-full h-full">
+            <option value="on-every-visit">On every visit</option>
+            <option value="once-per-session">Once per session</option>
+            <option value="once-per-page">Once per page</option>
+            <option value="on-every-visit-and-once-per-session">On every visit and once per session</option>
+            <option value="never">Never</option>
+        </select>
+    </div>
+
+    <button class="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer
      hover:bg-primary-dark hover:-translate-y-1 transition-all duration-200
        lg:text-xl lg:font-black">
-            Save the loader
-        </button>
-    </div>
+        Save the loader
+    </button>
 </div>

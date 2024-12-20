@@ -46,14 +46,14 @@ const allowedProperties = {
       type: "color",
       category: "svg",
     },
-  ],
-  advanced: [
     {
-      property: "background-gradient",
-      label: "Background Gradient",
+      property: "background-image",
+      label: "Background Image",
       type: "text",
       category: "appearance",
     },
+  ],
+  advanced: [
     {
       property: "border-color",
       label: "Border Color",
@@ -183,7 +183,7 @@ function createInputField(ruleSelector, property, value) {
   childDiv.className = "flex items-center justify-between w-full";
 
   const label = document.createElement("label");
-  label.textContent = propertyInfo.label + ": " + value;
+  label.textContent = propertyInfo.label + ": ";
   label.style.setProperty("min-width", "100px");
   label.className = "w-1/3 text-md font-bold";
 
