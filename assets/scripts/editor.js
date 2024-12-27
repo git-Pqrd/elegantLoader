@@ -229,26 +229,19 @@ function createInputField(rule, propertyInfo) {
     "initial";
 
   const childDiv = document.createElement("div");
-  childDiv.className = "flex items-center justify-between w-full";
-
-  // Add visual indicator if property is set to initial or default value
-  if (
-    currentValue === "initial" ||
-    currentValue === defaultValues[propertyInfo.property]
-  ) {
-    childDiv.classList.add("opacity-50");
-  }
+  childDiv.className =
+    "flex items-center justify-between w-full p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200";
 
   // Add a wrapper for the input and ignore button
   const inputWrapper = document.createElement("div");
-  inputWrapper.className = "flex items-center gap-2";
+  inputWrapper.className = "flex items-center gap-2 h-10";
 
   const iframe = document.getElementById("previewFrame");
   // Create ignore button
   const ignoreButton = document.createElement("button");
-  ignoreButton.innerHTML = "×";
+  ignoreButton.innerHTML = "\u274C";
   ignoreButton.className =
-    "px-2 py-1 text-gray-500 hover:text-red-500 font-bold text-xl";
+    "px-2 h-full mr-2 text-gray-500 hover:text-red-500 font-bold text-sm transition-colors duration-200";
   ignoreButton.title = "Remove this property";
   ignoreButton.attributes = {
     rule_selector: rule.selectorText,
@@ -269,20 +262,16 @@ function createInputField(rule, propertyInfo) {
       })
       .join("\n");
 
-    // Add visual feedback
-    childDiv.classList.add("opacity-50");
-
     // Regenerate options and restart iframe
     generateOptions(currentStyleContent);
     restartIframe(iframe);
   });
 
   // create a button to reset the property initial value
-
   const resetButton = document.createElement("button");
-  resetButton.innerHTML = "&larr;";
+  resetButton.innerHTML = "↺";
   resetButton.className =
-    "px-2 py-1 text-gray-500 hover:text-red-500 font-bold text-xl";
+    "px-2 py-1 text-gray-500 hover:text-blue-500 font-bold text-xl transition-colors duration-200";
   resetButton.title = "Reset this property to its initial value";
   resetButton.addEventListener("click", function () {
     // Get the initial value from the initialStyle
@@ -306,9 +295,6 @@ function createInputField(rule, propertyInfo) {
         })
         .join("\n");
 
-      // Remove opacity if it was previously ignored
-      childDiv.classList.remove("opacity-50");
-
       // Regenerate options and restart iframe
       generateOptions(currentStyleContent);
       restartIframe(iframe);
@@ -317,21 +303,22 @@ function createInputField(rule, propertyInfo) {
 
   const label = document.createElement("label");
   label.textContent = propertyInfo.label + ": ";
-  label.style.setProperty("min-width", "100px");
+  label.style.setProperty("min-width", "150px");
   label.style.setProperty("min-height", "30px");
-  label.className = "w-1/3 text-md font-bold items-end flex";
+  label.className =
+    "w-1/3 text-md font-semibold text-gray-700 items-center flex";
 
   let input;
 
   if (propertyInfo.type === "select") {
     input = document.createElement("select");
+    input.className =
+      "w-44 h-10 px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200";
     propertyInfo.options.forEach((option) => {
       const optionElement = document.createElement("option");
       optionElement.value = option;
       optionElement.textContent = option;
       optionElement.selected = option === currentValue;
-      optionElement.className =
-        "p-2 hover:bg-primary-light hover:text-white transition-colors duration-200";
       input.appendChild(optionElement);
     });
   } else if (propertyInfo.type === "color") {
@@ -339,7 +326,7 @@ function createInputField(rule, propertyInfo) {
     input.type = "color";
     input.value = currentValue;
     input.className =
-      "p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg" +
+      "p-1 h-10 w-14 block bg-white border border-gray-300 cursor-pointer rounded-lg shadow-sm transition-all duration-200" +
       " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
   } else if (propertyInfo.type === "gradient") {
     input = createGradientDiv(currentValue);
@@ -348,24 +335,40 @@ function createInputField(rule, propertyInfo) {
   } else {
     input = document.createElement("input");
     input.type = propertyInfo.type;
-    input.className = "h-8 w-auto min-w-44";
+    input.className =
+      "h-10 w-44 px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200";
   }
   if (input.type !== "select" && !input.value) {
     input.value = currentValue;
   }
   input.attributes.rule_selector = rule.selectorText;
   input.attributes.property = propertyInfo.property;
-
-  childDiv.appendChild(label);
-  inputWrapper.appendChild(input);
-  inputWrapper.appendChild(ignoreButton);
+  // create a wrapper for the label and the buttons
+  const labelWrapper = document.createElement("div");
+  labelWrapper.className = "flex items-center gap-2 align-middle";
   const initialValue = getInitialValue(
     rule.selectorText,
     propertyInfo.property
   );
   if (initialValue && initialValue !== currentValue) {
-    inputWrapper.appendChild(resetButton);
+    labelWrapper.appendChild(resetButton);
   }
+  labelWrapper.appendChild(ignoreButton);
+  labelWrapper.appendChild(label);
+  childDiv.appendChild(labelWrapper);
+
+  // Add visual indicator if property is set to initial or default value
+  if (
+    currentValue === "initial" ||
+    currentValue === defaultValues[propertyInfo.property]
+  ) {
+    inputWrapper.classList.add("opacity-50");
+    // Not adding to the ctas
+    childDiv.lastElementChild.classList.add("opacity-50");
+  }
+  // add input to the input wrapper
+  inputWrapper.appendChild(input);
+
   childDiv.appendChild(inputWrapper);
 
   return childDiv;
@@ -373,7 +376,7 @@ function createInputField(rule, propertyInfo) {
 
 function createGradientDiv(value) {
   const childDiv = document.createElement("div");
-  childDiv.className = "flex items-center justify-end w-full";
+  childDiv.className = "flex items-center justify-end w-full gap-2";
 
   const colorRegex =
     /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})|rgba?\(\s*(\d{1,3}\s*,\s*){2,3}\d{1,3}\s*(,\s*\d+(\.\d+)?\s*)?\)/g;
@@ -383,9 +386,15 @@ function createGradientDiv(value) {
     colorInput.type = "color";
     colorInput.value = color;
     colorInput.className =
-      "m-1 h-10 w-14 block border border-primary cursor-pointer";
+      "p-1 h-10 w-14 block bg-white border border-gray-300 cursor-pointer rounded-lg shadow-sm transition-all duration-200" +
+      " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
     childDiv.appendChild(colorInput);
   });
+  const plusButton = document.createElement("button");
+  plusButton.innerHTML = "+";
+  plusButton.className =
+    "px-2 py-1 text-gray-500 hover:text-blue-500 font-bold text-xl transition-colors duration-200";
+  childDiv.appendChild(plusButton);
   return childDiv;
 }
 
@@ -395,8 +404,7 @@ function createRangeInput(propertyInfo, value) {
   input.min = propertyInfo.min;
   input.max = propertyInfo.max;
   input.className =
-    "h-4 py-2 w-full bg-gray-200 max-w-[400px] rounded-lg appearance-none cursor-pointer";
-  input.style.background = "linear-gradient(90deg, #6cb4b4 0%, #99d9d9 100%)";
+    "h-2 w-44 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg appearance-none cursor-pointer";
   input.style.outline = "none";
 
   // Parse initial value and handle invalid values
@@ -423,11 +431,11 @@ function generateOptions(currentStyleContent) {
 
     // Create section title
     parentDiv.className =
-      "flex items-start flex-col justify-between w-full my-4 pb-4";
+      "flex items-start flex-col justify-between w-full my-6 pb-4 bg-white rounded-xl shadow-sm p-4";
     const sectionTitle = document.createElement("h2");
     sectionTitle.textContent = rule?.selectorText;
     sectionTitle.className =
-      "text-2xl font-normal py-2 w-full border-b border-gray-200";
+      "text-2xl font-semibold text-gray-800 py-3 w-full border-b border-gray-200 mb-4";
     parentDiv.appendChild(sectionTitle);
 
     const allProperties = [
