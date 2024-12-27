@@ -20,7 +20,7 @@ flex flex-col lg:flex-row-reverse">
                      rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
                      after:content-[''] after:absolute after:top-[2px] after:start-[2px]
                      after:bg-white after:border-gray-300 after:border after:rounded-full
-                     after:h-5 after:w-5 after:transition-all
+                     after:h-4 after:w-4 after:transition-all
                      peer-checked:bg-primary-light">
                 </div>
                 <span class="ms-3 text-sm font-medium text-primary">Advanced Mode</span>

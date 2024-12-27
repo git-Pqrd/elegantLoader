@@ -203,6 +203,8 @@ function createInputField(ruleSelector, property, value) {
       optionElement.value = option;
       optionElement.textContent = option;
       optionElement.selected = option === value;
+      optionElement.className =
+        "p-2 hover:bg-primary-light hover:text-white transition-colors duration-200";
       input.appendChild(optionElement);
     });
   } else if (propertyInfo.type === "color") {
@@ -280,16 +282,22 @@ function generateOptions(currentStyleContent) {
   const css = new CSSStyleSheet();
   css.replaceSync(currentStyleContent);
   optionsContainer.innerHTML = "";
+
   // Create input fields based on CSS properties
   Array.from(css.cssRules).forEach((rule) => {
+    if (!rule.style) return;
     let parentDiv = document.createElement("div");
-    parentDiv.className = "flex items-start flex-col justify-between w-full";
+
+    // Create section title
+    parentDiv.className =
+      "flex items-start flex-col justify-between w-full my-4 pb-4 border-b border-gray-200";
     const sectionTitle = document.createElement("h2");
-    sectionTitle.textContent = rule?.selectorText?.split("-")[2] || "Default";
+    sectionTitle.textContent = rule?.selectorText;
     sectionTitle.className = "text-2xl font-bold";
     parentDiv.appendChild(sectionTitle);
 
-    // If field is found in allowedProperties, create input field
+    // Create input fields
+    console.log(rule.style);
     Array.from(rule.style).forEach((property) => {
       const inputField = createInputField(
         rule.selectorText,
