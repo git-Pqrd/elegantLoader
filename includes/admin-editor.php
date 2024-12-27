@@ -10,7 +10,7 @@ flex flex-col lg:flex-row-reverse">
 
     <!-- Controls Column -->
     <div id="elegant-options" class="w-full lg:w-1/3 p-4 py-8 flex flex-col justify-start items-start">
-        <div class="flex flex-row justify-between items-end gap-4 mb-4">
+        <div class="flex flex-row justify-between items-end gap-4 mb-4 border-b-4 border-primary-light pb-4">
             <h1 class="text-4xl font-black text-primary">Elegant Loader</h1>
             <!-- Advanced Mode -->
             <label class="inline-flex items-center cursor-pointer">
@@ -26,7 +26,6 @@ flex flex-col lg:flex-row-reverse">
                 <span class="ms-3 text-sm font-medium text-primary">Advanced Mode</span>
             </label>
         </div>
-        <p class="text-lg font-bold text-almost-black  border-b-4 border-primary-light pb-4">Customize your elegant loader to fit your brand</p>
         <!-- Editor -->
         <div id="elegant-options-container" class="flex flex-col gap-4 w-full h-auto">
         </div>

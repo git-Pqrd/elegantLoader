@@ -178,23 +178,29 @@ const allowedProperties = {
   ],
 };
 
-function createInputField(ruleSelector, property, value) {
-  const propertyInfo = [
-    ...allowedProperties.basic,
-    ...(isAdvanced ? allowedProperties.advanced : []),
-  ].find((item) => item.property === property);
+/** Keeps the rules that are editable */
+function filteredCssRules(rules) {
+  return Array.from(rules).filter(
+    (rule) => !rule.cssText.includes("@keyframes")
+  );
+}
 
-  if (!propertyInfo) return null;
-
+function createInputField(rule, propertyInfo) {
   const childDiv = document.createElement("div");
   childDiv.className = "flex items-center justify-between w-full";
 
   const label = document.createElement("label");
   label.textContent = propertyInfo.label + ": ";
   label.style.setProperty("min-width", "100px");
-  label.className = "w-1/3 text-md font-bold";
+  label.style.setProperty("min-height", "30px");
+  label.className = "w-1/3 text-md font-bold items-end flex";
 
   let input;
+
+  const currentValue = rule.style.getPropertyValue(propertyInfo.property);
+  if (!currentValue) {
+    return null;
+  }
 
   if (propertyInfo.type === "select") {
     input = document.createElement("select");
@@ -202,7 +208,7 @@ function createInputField(ruleSelector, property, value) {
       const optionElement = document.createElement("option");
       optionElement.value = option;
       optionElement.textContent = option;
-      optionElement.selected = option === value;
+      optionElement.selected = option === currentValue;
       optionElement.className =
         "p-2 hover:bg-primary-light hover:text-white transition-colors duration-200";
       input.appendChild(optionElement);
@@ -210,24 +216,26 @@ function createInputField(ruleSelector, property, value) {
   } else if (propertyInfo.type === "color") {
     input = document.createElement("input");
     input.type = "color";
-    input.value = value;
+    input.value = currentValue;
     input.className =
       "p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg" +
       " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
   } else if (propertyInfo.type === "gradient") {
-    input = createGradientDiv(property, value);
+    console.log(propertyInfo);
+    console.log(currentValue);
+    input = createGradientDiv(currentValue);
   } else if (propertyInfo.type === "range") {
-    input = createRangeInput(propertyInfo, value);
+    input = createRangeInput(propertyInfo, currentValue);
   } else {
     input = document.createElement("input");
     input.type = propertyInfo.type;
     input.className = "h-8 w-auto min-w-44";
   }
   if (input.type !== "select" && !input.value) {
-    input.value = value;
+    input.value = currentValue;
   }
-  input.attributes.property = property;
-  input.attributes.rule_selector = ruleSelector;
+  input.attributes.rule_selector = rule.selectorText;
+  input.attributes.property = propertyInfo.property;
 
   childDiv.appendChild(label);
   childDiv.appendChild(input);
@@ -235,14 +243,13 @@ function createInputField(ruleSelector, property, value) {
   return childDiv;
 }
 
-function createGradientDiv(property, value) {
+function createGradientDiv(value) {
   const childDiv = document.createElement("div");
   childDiv.className = "flex items-center justify-end w-full";
 
   const colorRegex =
     /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})|rgba?\(\s*(\d{1,3}\s*,\s*){2,3}\d{1,3}\s*(,\s*\d+(\.\d+)?\s*)?\)/g;
-  const colors = value.match(colorRegex);
-  console.log(colors);
+  const colors = value.match(colorRegex) || [];
   colors.forEach((color) => {
     const colorInput = document.createElement("input");
     colorInput.type = "color";
@@ -251,7 +258,6 @@ function createGradientDiv(property, value) {
       "m-1 h-10 w-14 block border border-primary cursor-pointer";
     childDiv.appendChild(colorInput);
   });
-  console.log(childDiv);
   return childDiv;
 }
 
@@ -284,26 +290,24 @@ function generateOptions(currentStyleContent) {
   optionsContainer.innerHTML = "";
 
   // Create input fields based on CSS properties
-  Array.from(css.cssRules).forEach((rule) => {
-    if (!rule.style) return;
+  Array.from(filteredCssRules(css.cssRules)).forEach((rule) => {
     let parentDiv = document.createElement("div");
 
     // Create section title
     parentDiv.className =
-      "flex items-start flex-col justify-between w-full my-4 pb-4 border-b border-gray-200";
+      "flex items-start flex-col justify-between w-full my-4 pb-4";
     const sectionTitle = document.createElement("h2");
     sectionTitle.textContent = rule?.selectorText;
-    sectionTitle.className = "text-2xl font-bold";
+    sectionTitle.className =
+      "text-2xl font-normal py-2 w-full border-b border-gray-200";
     parentDiv.appendChild(sectionTitle);
 
-    // Create input fields
-    console.log(rule.style);
-    Array.from(rule.style).forEach((property) => {
-      const inputField = createInputField(
-        rule.selectorText,
-        property,
-        rule.style.getPropertyValue(property)
-      );
+    const allProperties = [
+      ...allowedProperties.basic,
+      ...(isAdvanced ? allowedProperties.advanced : []),
+    ];
+    Array.from(allProperties).forEach((property) => {
+      const inputField = createInputField(rule, property);
       if (inputField) {
         parentDiv.appendChild(inputField);
       }
@@ -422,7 +426,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const inputFields = document.querySelectorAll("input");
   inputFields.forEach((input) => {
     input.addEventListener("change", (e) => {
-      console.log(e.target.value);
       const iframe = document.getElementById("previewFrame");
       const doc = iframe.contentDocument || iframe.contentWindow.document;
       // Get the current style content
@@ -431,12 +434,14 @@ document.addEventListener("DOMContentLoaded", function () {
       currentStyle.replaceSync(currentStyleUnparsed);
 
       // Create new CSS content
-      const newRules = Array.from(currentStyle.cssRules)
+      let newRules = Array.from(currentStyle.cssRules)
         .map((rule) => {
+          if (rule.cssText.includes("@keyframes")) return rule.cssText;
           if (rule.selectorText === e.target.attributes.rule_selector) {
             if (!rule.style) {
               rule.style = document.createElement("div").style;
             }
+            console.log("property", e.target.attributes.property);
             rule.style.setProperty(
               e.target.attributes.property,
               e.target.value +
@@ -456,7 +461,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Update both the iframe and current style content
       currentStyleContent = newRules;
-
       restartIframe(iframe);
     });
   });

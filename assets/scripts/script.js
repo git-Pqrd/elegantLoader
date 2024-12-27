@@ -177,6 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const continueCTA = document.getElementById(
     "animation-option-continue-button"
   );
+  if (!continueCTA) return;
   continueCTA.addEventListener("click", function (event) {
     event.preventDefault();
     jQuery.ajax({
