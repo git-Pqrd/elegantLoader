@@ -7,50 +7,62 @@ const allowedProperties = {
     {
       property: "background-color",
       label: "Background Color",
-      type: "color",
+      type: "gradient",
       category: "appearance",
+      unit: "",
     },
     {
       property: "color",
       label: "Text Color",
       type: "color",
       category: "appearance",
+      unit: "",
     },
     {
       property: "width",
       label: "Width",
-      type: "text",
+      type: "range",
+      min: 0,
+      max: 100,
       category: "size",
+      unit: "%",
     },
     {
       property: "height",
       label: "Height",
-      type: "text",
+      type: "range",
+      min: 0,
+      max: 100,
       category: "size",
+      unit: "%",
     },
     {
       property: "border-radius",
       label: "Border Radius",
       type: "text",
       category: "appearance",
+      unit: "px",
     },
     {
       property: "stroke",
       label: "Stroke Color",
       type: "color",
       category: "svg",
+      unit: "",
     },
     {
       property: "fill",
       label: "Fill Color",
       type: "color",
       category: "svg",
+      unit: "",
     },
     {
       property: "background-image",
-      label: "Background Image",
-      type: "text",
+      label: "Background Gradient",
+      type: "gradient",
       category: "appearance",
+      unit: "",
     },
   ],
   advanced: [
@@ -59,36 +71,42 @@ const allowedProperties = {
       label: "Border Color",
       type: "color",
       category: "border",
+      unit: "",
     },
     {
       property: "border-width",
       label: "Border Width",
       type: "text",
       category: "border",
+      unit: "px",
     },
     {
       property: "margin",
       label: "Margin",
       type: "text",
       category: "spacing",
+      unit: "px",
     },
     {
       property: "padding",
       label: "Padding",
       type: "text",
       category: "spacing",
+      unit: "px",
     },
     {
       property: "font-size",
       label: "Font Size",
       type: "text",
       category: "typography",
+      unit: "px",
     },
     {
       property: "font-weight",
       label: "Font Weight",
       type: "text",
       category: "typography",
+      unit: "",
     },
     {
       property: "text-align",
@@ -96,6 +114,7 @@ const allowedProperties = {
       type: "select",
       options: ["left", "center", "right"],
       category: "typography",
+      unit: "",
     },
     {
       property: "text-transform",
@@ -103,24 +122,21 @@ const allowedProperties = {
       type: "select",
       options: ["none", "uppercase", "lowercase", "capitalize"],
       category: "typography",
+      unit: "",
     },
     {
       property: "animation-duration",
       label: "Animation Duration",
       type: "text",
       category: "animation",
-    },
-    {
-      property: "animation-delay",
-      label: "Animation Delay",
-      type: "text",
-      category: "animation",
+      unit: "s",
     },
     {
       property: "animation-iteration-count",
       label: "Animation Repeat",
       type: "text",
       category: "animation",
+      unit: "",
     },
     {
       property: "animation-timing-function",
@@ -128,38 +144,28 @@ const allowedProperties = {
       type: "select",
       options: ["linear", "ease", "ease-in", "ease-out", "ease-in-out"],
       category: "animation",
-    },
-    {
-      property: "animation-direction",
-      label: "Animation Direction",
-      type: "select",
-      options: ["normal", "reverse", "alternate", "alternate-reverse"],
-      category: "animation",
-    },
-    {
-      property: "animation-fill-mode",
-      label: "Animation Fill Mode",
-      type: "select",
-      options: ["none", "forwards", "backwards", "both"],
-      category: "animation",
+      unit: "",
     },
     {
       property: "stroke-dasharray",
       label: "Stroke Dash Array",
       type: "text",
       category: "svg",
+      unit: "px",
     },
     {
       property: "stroke-dashoffset",
       label: "Stroke Dash Offset",
       type: "text",
       category: "svg",
+      unit: "px",
     },
     {
       property: "stroke-width",
       label: "Stroke Width",
       type: "text",
       category: "svg",
+      unit: "px",
     },
     {
       property: "stroke-linecap",
@@ -167,6 +173,7 @@ const allowedProperties = {
       type: "select",
       options: ["butt", "round", "square"],
       category: "svg",
+      unit: "",
     },
   ],
 };
@@ -203,13 +210,18 @@ function createInputField(ruleSelector, property, value) {
     input.type = "color";
     input.value = value;
     input.className =
-      "p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
+      "p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg" +
+      " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
+  } else if (propertyInfo.type === "gradient") {
+    input = createGradientDiv(property, value);
+  } else if (propertyInfo.type === "range") {
+    input = createRangeInput(propertyInfo, value);
   } else {
     input = document.createElement("input");
     input.type = propertyInfo.type;
     input.className = "h-8 w-auto min-w-44";
   }
-  if (input.type !== "select") {
+  if (input.type !== "select" && !input.value) {
     input.value = value;
   }
   input.attributes.property = property;
@@ -219,6 +231,46 @@ function createInputField(ruleSelector, property, value) {
   childDiv.appendChild(input);
 
   return childDiv;
+}
+
+function createGradientDiv(property, value) {
+  const childDiv = document.createElement("div");
+  childDiv.className = "flex items-center justify-end w-full";
+
+  const colorRegex =
+    /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})|rgba?\(\s*(\d{1,3}\s*,\s*){2,3}\d{1,3}\s*(,\s*\d+(\.\d+)?\s*)?\)/g;
+  const colors = value.match(colorRegex);
+  console.log(colors);
+  colors.forEach((color) => {
+    const colorInput = document.createElement("input");
+    colorInput.type = "color";
+    colorInput.value = color;
+    colorInput.className =
+      "m-1 h-10 w-14 block border border-primary cursor-pointer";
+    childDiv.appendChild(colorInput);
+  });
+  console.log(childDiv);
+  return childDiv;
+}
+
+function createRangeInput(propertyInfo, value) {
+  const input = document.createElement("input");
+  input.type = "range";
+  input.min = propertyInfo.min;
+  input.max = propertyInfo.max;
+  input.className =
+    "h-4 py-2 w-full bg-gray-200 max-w-[400px] rounded-lg appearance-none cursor-pointer";
+  input.style.background = "linear-gradient(90deg, #6cb4b4 0%, #99d9d9 100%)";
+  input.style.outline = "none";
+
+  // Parse initial value and handle invalid values
+  let initialValue = parseInt(value) || 0;
+  initialValue = Math.max(
+    propertyInfo.min,
+    Math.min(propertyInfo.max, initialValue)
+  );
+  input.value = String(initialValue);
+  return input;
 }
 
 function generateOptions(currentStyleContent) {
@@ -233,10 +285,11 @@ function generateOptions(currentStyleContent) {
     let parentDiv = document.createElement("div");
     parentDiv.className = "flex items-start flex-col justify-between w-full";
     const sectionTitle = document.createElement("h2");
-    sectionTitle.textContent = rule.selectorText.split("-")[2] || "Default";
+    sectionTitle.textContent = rule?.selectorText?.split("-")[2] || "Default";
     sectionTitle.className = "text-2xl font-bold";
     parentDiv.appendChild(sectionTitle);
 
+    // If field is found in allowedProperties, create input field
     Array.from(rule.style).forEach((property) => {
       const inputField = createInputField(
         rule.selectorText,
@@ -247,40 +300,9 @@ function generateOptions(currentStyleContent) {
         parentDiv.appendChild(inputField);
       }
     });
+
     optionsContainer.appendChild(parentDiv);
   });
-}
-
-// Helper functions for color conversion
-function rgbToHex(rgb) {
-  if (!rgb) return null;
-  const rgbArr = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
-  return rgbArr
-    ? "#" +
-        ("0" + parseInt(rgbArr[1], 10).toString(16)).slice(-2) +
-        ("0" + parseInt(rgbArr[2], 10).toString(16)).slice(-2) +
-        ("0" + parseInt(rgbArr[3], 10).toString(16)).slice(-2)
-    : null;
-}
-
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-function getInputTypeForProperty(property) {
-  if (property.includes("color")) return "color";
-  if (property.includes("background")) return "color";
-  if (property.includes("border")) return "color";
-  if (property.includes("width")) return "text";
-  if (property.includes("height")) return "text";
-  if (property.includes("margin")) return "text";
-  if (property.includes("padding")) return "text";
-  if (property.includes("border-radius")) return "text";
-
-  return "text";
 }
 
 function restartIframe(iframe) {
@@ -289,7 +311,6 @@ function restartIframe(iframe) {
     // Get the iframe document
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     const bodyContent = iframeDoc.body.innerHTML;
-    console.log(currentStyleContent);
     // Recreate the document content
     iframeDoc.open();
     iframeDoc.write(`
@@ -393,6 +414,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const inputFields = document.querySelectorAll("input");
   inputFields.forEach((input) => {
     input.addEventListener("change", (e) => {
+      console.log(e.target.value);
       const iframe = document.getElementById("previewFrame");
       const doc = iframe.contentDocument || iframe.contentWindow.document;
       // Get the current style content
@@ -409,7 +431,15 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             rule.style.setProperty(
               e.target.attributes.property,
-              e.target.value
+              e.target.value +
+                ((e.target.attributes.property &&
+                  [
+                    ...allowedProperties.basic,
+                    ...allowedProperties.advanced,
+                  ].find(
+                    (prop) => prop.property === e.target.attributes.property
+                  )?.unit) ||
+                  "")
             );
           }
           return rule.cssText;
