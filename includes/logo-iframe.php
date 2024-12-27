@@ -5,7 +5,8 @@ if (file_exists($path)) {
     if (!empty($svg_url) && !empty(get_option('elegant_loader_style'))) {
 ?>
         <iframe
-            id="previewFrame" style="width:100%; height:100%;">
+            id="previewFrame" style="width:100%; height:100%;"
+            class="overflow-hidden border-gray-200 border-2 border-solid">
         </iframe>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -15,11 +16,14 @@ if (file_exists($path)) {
                 doc.write(`
                                         <html>
                                         <head>
+                                            <meta name="viewport"
+                                                content="width=device-width, initial-scale=1.0, viewport-fit=cover, shrink-to-fit=no"
+                                            >
                                             <style> 
                                                 <?php echo file_get_contents(get_option('elegant_loader_style')); ?>
                                             </style> 
                                         </head>
-                                        <body style="width:100vw; height:100vh; overflow:hidden;">
+                                        <body style="width:100vw; height:100vh; overflow:hidden; margin:0; padding:0;">
                                             <?php include_once $path; ?>
                                             <iframe src="<?php echo home_url('/'); ?>?elegant_loader=false" style="width:100vw; height:100vh;"></iframe>
                                         </body>

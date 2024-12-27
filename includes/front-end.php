@@ -32,3 +32,12 @@ function elegant_loader_enqueue_styles()
     wp_enqueue_script('elegant-loader-custom-js', plugin_dir_url(__FILE__) . '../serving/elegant-loader.js');
 }
 add_action('wp_enqueue_scripts', 'elegant_loader_enqueue_styles');
+
+// hide the admin bar if we are in preview mode
+function elegant_loader_hide_admin_bar()
+{
+    if (isset($_GET['elegant_loader']) && $_GET['elegant_loader'] === 'false') {
+        add_filter('show_admin_bar', '__return_false');
+    }
+}
+add_action('after_setup_theme', 'elegant_loader_hide_admin_bar');

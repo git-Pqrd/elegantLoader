@@ -2,6 +2,35 @@ let currentStyleContent = "";
 let initialStyle = "";
 let isAdvanced = false;
 
+const defaultValues = {
+  "background-color": "#ffffff",
+  color: "#000000",
+  width: "100%",
+  height: "100%",
+  "border-radius": "0px",
+  stroke: "#000000",
+  fill: "#000000",
+  "background-image": "none",
+  overflow: "visible",
+  "border-color": "#000000",
+  "border-width": "0px",
+  margin: "0px",
+  padding: "0px",
+  "animation-name": "none",
+  "font-size": "16px",
+  "font-weight": "400",
+  "text-align": "left",
+  "text-transform": "none",
+  "animation-duration": "1s",
+  "animation-iteration-count": "1",
+  "animation-timing-function": "linear",
+  "stroke-color": "#000000",
+  "stroke-dasharray": "0",
+  "stroke-dashoffset": "0",
+  "stroke-width": "1px",
+  "stroke-linecap": "butt",
+};
+
 const allowedProperties = {
   basic: [
     {
@@ -61,6 +90,14 @@ const allowedProperties = {
       property: "background-image",
       label: "Background Gradient",
       type: "gradient",
+      category: "appearance",
+      unit: "",
+    },
+    {
+      property: "overflow",
+      label: "Overflow",
+      type: "select",
+      options: ["visible", "hidden", "scroll", "auto"],
       category: "appearance",
       unit: "",
     },
@@ -186,8 +223,97 @@ function filteredCssRules(rules) {
 }
 
 function createInputField(rule, propertyInfo) {
+  const currentValue =
+    rule.style.getPropertyValue(propertyInfo.property) ||
+    defaultValues[propertyInfo.property] ||
+    "initial";
+
   const childDiv = document.createElement("div");
   childDiv.className = "flex items-center justify-between w-full";
+
+  // Add visual indicator if property is set to initial or default value
+  if (
+    currentValue === "initial" ||
+    currentValue === defaultValues[propertyInfo.property]
+  ) {
+    childDiv.classList.add("opacity-50");
+  }
+
+  // Add a wrapper for the input and ignore button
+  const inputWrapper = document.createElement("div");
+  inputWrapper.className = "flex items-center gap-2";
+
+  const iframe = document.getElementById("previewFrame");
+  // Create ignore button
+  const ignoreButton = document.createElement("button");
+  ignoreButton.innerHTML = "×";
+  ignoreButton.className =
+    "px-2 py-1 text-gray-500 hover:text-red-500 font-bold text-xl";
+  ignoreButton.title = "Remove this property";
+  ignoreButton.attributes = {
+    rule_selector: rule.selectorText,
+    property: propertyInfo.property,
+  };
+  ignoreButton.addEventListener("click", function () {
+    rule.style.removeProperty(propertyInfo.property);
+
+    // Update currentStyleContent
+    const css = new CSSStyleSheet();
+    css.replaceSync(currentStyleContent);
+    currentStyleContent = Array.from(css.cssRules)
+      .map((r) => {
+        if (r.selectorText === rule.selectorText) {
+          return rule.cssText;
+        }
+        return r.cssText;
+      })
+      .join("\n");
+
+    // Add visual feedback
+    childDiv.classList.add("opacity-50");
+
+    // Regenerate options and restart iframe
+    generateOptions(currentStyleContent);
+    restartIframe(iframe);
+  });
+
+  // create a button to reset the property initial value
+
+  const resetButton = document.createElement("button");
+  resetButton.innerHTML = "&larr;";
+  resetButton.className =
+    "px-2 py-1 text-gray-500 hover:text-red-500 font-bold text-xl";
+  resetButton.title = "Reset this property to its initial value";
+  resetButton.addEventListener("click", function () {
+    // Get the initial value from the initialStyle
+    const initialValue = getInitialValue(
+      rule.selectorText,
+      propertyInfo.property
+    );
+
+    if (initialValue) {
+      rule.style.setProperty(propertyInfo.property, initialValue);
+
+      // Update currentStyleContent
+      const css = new CSSStyleSheet();
+      css.replaceSync(currentStyleContent);
+      currentStyleContent = Array.from(css.cssRules)
+        .map((r) => {
+          if (r.selectorText === rule.selectorText) {
+            return rule.cssText;
+          }
+          return r.cssText;
+        })
+        .join("\n");
+
+      // Remove opacity if it was previously ignored
+      childDiv.classList.remove("opacity-50");
+
+      // Regenerate options and restart iframe
+      generateOptions(currentStyleContent);
+      restartIframe(iframe);
+    }
+  });
 
   const label = document.createElement("label");
   label.textContent = propertyInfo.label + ": ";
@@ -196,11 +322,6 @@ function createInputField(rule, propertyInfo) {
   label.className = "w-1/3 text-md font-bold items-end flex";
 
   let input;
-
-  const currentValue = rule.style.getPropertyValue(propertyInfo.property);
-  if (!currentValue) {
-    return null;
-  }
 
   if (propertyInfo.type === "select") {
     input = document.createElement("select");
@@ -221,8 +342,6 @@ function createInputField(rule, propertyInfo) {
       "p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg" +
       " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
   } else if (propertyInfo.type === "gradient") {
-    console.log(propertyInfo);
-    console.log(currentValue);
     input = createGradientDiv(currentValue);
   } else if (propertyInfo.type === "range") {
     input = createRangeInput(propertyInfo, currentValue);
@@ -238,7 +357,16 @@ function createInputField(rule, propertyInfo) {
   input.attributes.property = propertyInfo.property;
 
   childDiv.appendChild(label);
-  childDiv.appendChild(input);
+  inputWrapper.appendChild(input);
+  inputWrapper.appendChild(ignoreButton);
+  const initialValue = getInitialValue(
+    rule.selectorText,
+    propertyInfo.property
+  );
+  if (initialValue && initialValue !== currentValue) {
+    inputWrapper.appendChild(resetButton);
+  }
+  childDiv.appendChild(inputWrapper);
 
   return childDiv;
 }
@@ -354,6 +482,14 @@ function restartIframe(iframe) {
   }
 }
 
+function getInitialValue(selector, property) {
+  const css = new CSSStyleSheet();
+  css.replaceSync(initialStyle);
+  return Array.from(css.cssRules)
+    .find((rule) => rule.selectorText === selector)
+    ?.style.getPropertyValue(property);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   initialStyle =
     document
@@ -461,6 +597,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Update both the iframe and current style content
       currentStyleContent = newRules;
+      generateOptions(currentStyleContent);
       restartIframe(iframe);
     });
   });
