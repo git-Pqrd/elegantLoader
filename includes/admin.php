@@ -19,6 +19,15 @@ function elegant_loader_add_admin_menu()
 }
 add_action('admin_menu', 'elegant_loader_add_admin_menu');
 
+register_activation_hook(__FILE__, function () {
+    add_option('elegant_loader_show_home', false);
+    add_option('elegant_loader_show_posts', false);
+    add_option('elegant_loader_show_pages', false);
+    add_option('elegant_loader_show_archives', false);
+    add_option('elegant_loader_show_search', false);
+    add_option('elegant_loader_frequency', 'disabled');
+});
+
 /**
  * Enqueues the necessary CSS and JavaScript files for the admin interface.
  * Also localizes JavaScript variables for AJAX functionality.

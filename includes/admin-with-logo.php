@@ -93,7 +93,7 @@
         </div>
     </div>
 
-    <div id="animation-option-continue" class="flex gap-4 mt-8 hidden">
+    <div id="animation-option-continue" class="gap-4 mt-8 hidden">
         <button id="animation-option-continue-button" type="submit" class="text-xl bg-primary hover:bg-primary-dark text-white p-2 mb-4 flex items-center gap-2 cursor-pointer hover:-translate-y-1 transition-colors duration-200 px-4 py-2 rounded-sm">
             <img src="<?php echo plugin_dir_url(__FILE__) . '../assets/icons/right-arrow.svg'; ?>" alt="arrow-right" class="w-auto h-4">
             Nice! Click here to continue
