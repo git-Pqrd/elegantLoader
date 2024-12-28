@@ -9,7 +9,7 @@ const defaultValues = {
   color: "#000000",
   width: "100%",
   height: "100%",
-  "border-radius": "0px",
+  "border-radius": "0%",
   stroke: "#000000",
   fill: "#000000",
   "background-image": "none",
@@ -45,6 +45,7 @@ const allowedProperties = {
   basic: [
     {
       group: "Background",
+      showFor: ["*"],
       properties: [
         {
           property: "background",
@@ -64,6 +65,7 @@ const allowedProperties = {
     },
     {
       group: "Size",
+      showFor: ["*"],
       properties: [
         {
           property: "width",
@@ -87,6 +89,7 @@ const allowedProperties = {
     },
     {
       group: "SVG",
+      showFor: ["svg"],
       properties: [
         {
           property: "stroke",
@@ -108,6 +111,7 @@ const allowedProperties = {
   advanced: [
     {
       group: "Appearance",
+      showFor: ["*"],
       properties: [
         {
           property: "color",
@@ -119,9 +123,11 @@ const allowedProperties = {
         {
           property: "border-radius",
           label: "Border Radius",
-          type: "text",
+          type: "range",
+          min: 0,
+          max: 100,
           category: "appearance",
-          unit: "px",
+          unit: "%",
         },
         {
           property: "overflow",
@@ -135,6 +141,7 @@ const allowedProperties = {
     },
     {
       group: "Spacing",
+      showFor: ["*"],
       properties: [
         {
           property: "margin",
@@ -158,6 +165,7 @@ const allowedProperties = {
     },
     {
       group: "Border",
+      showFor: ["*"],
       properties: [
         {
           property: "border-color",
@@ -179,6 +187,7 @@ const allowedProperties = {
     },
     {
       group: "Typography",
+      showFor: ["*"],
       properties: [
         {
           property: "font-size",
@@ -218,6 +227,7 @@ const allowedProperties = {
     },
     {
       group: "Animation",
+      showFor: ["*"],
       properties: [
         {
           property: "animation-duration",
@@ -247,6 +257,7 @@ const allowedProperties = {
     },
     {
       group: "SVG (Advanced)",
+      showFor: ["svg"],
       properties: [
         {
           property: "stroke-dasharray",
@@ -402,12 +413,8 @@ function createInputField(rule, propertyInfo) {
       input.appendChild(optionElement);
     });
   } else if (propertyInfo.type === "color") {
-    input = document.createElement("input");
-    input.type = "color";
-    input.value = currentValue;
-    input.className =
-      "p-1 h-10 w-14 block bg-white border border-gray-300 cursor-pointer rounded-lg shadow-sm transition-all duration-200" +
-      " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
+    console.log("Property is color", currentValue);
+    input = createColorInput(propertyInfo, rule, currentValue);
   } else if (propertyInfo.type === "gradient") {
     input = createGradientDiv(propertyInfo, rule, currentValue);
   } else if (propertyInfo.type === "range") {
@@ -448,6 +455,20 @@ function createInputField(rule, propertyInfo) {
   childDiv.appendChild(inputWrapper);
 
   return childDiv;
+}
+
+/** Create a color input for "background: color" */
+function createColorInput(propertyInfo, rule, value) {
+  const input = document.createElement("input");
+  input.type = "color";
+  input.value = rbgToHex(value);
+  input.className =
+    "p-1 h-10 w-14 block bg-white border border-gray-300 cursor-pointer rounded-lg shadow-sm transition-all duration-200" +
+    " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
+  input.setAttribute("rule_selector", rule.selectorText);
+  input.setAttribute("property", propertyInfo.property);
+  input.addEventListener("change", handleInputChange);
+  return input;
 }
 
 /** Create gradient color inputs for "background: linear-gradient(...)" */
@@ -508,10 +529,21 @@ function createGradientInput(propertyInfo, rule, value) {
   deleteButton.addEventListener("click", () => {
     const parentDiv = wrapper.closest(".parent-gradient");
     wrapper.remove();
-    // Force a recalculation of the gradient
-    const event = new Event("change");
-    event.target = parentDiv.querySelector("input");
-    handleInputChange(event);
+
+    // Create a new event with the necessary properties
+    const remainingInput = parentDiv.querySelector("input");
+    const syntheticEvent = new Event("change");
+    syntheticEvent.target = remainingInput;
+
+    // Manually add the required attributes
+    Object.defineProperties(syntheticEvent, {
+      target: {
+        value: remainingInput,
+        writable: false,
+      },
+    });
+
+    handleInputChange(syntheticEvent);
   });
 
   wrapper.appendChild(input);
@@ -620,23 +652,41 @@ function generateOptions(currentStyleContent) {
 
     // For each group, create a sub-section
     allGroups.forEach((groupObj) => {
+      if (
+        !rule.selectorText.includes(groupObj.showFor) &&
+        !groupObj.showFor.includes("*")
+      ) {
+        return;
+      }
+
       const groupContainer = document.createElement("div");
       groupContainer.className = "w-full my-2 pl-4 border-l-2 border-gray-200";
 
-      // Group heading
-      const groupTitle = document.createElement("h3");
-      groupTitle.textContent = groupObj.group;
-      groupTitle.className = "text-xl font-semibold mb-2 text-gray-700";
-      groupContainer.appendChild(groupTitle);
+      // Create details/summary elements for collapsible group
+      const details = document.createElement("details");
+      details.className = "w-full";
+      details.open = true; // Open by default
+
+      const summary = document.createElement("summary");
+      summary.textContent = groupObj.group;
+      summary.className =
+        "text-xl font-semibold mb-2 text-gray-700 cursor-pointer hover:text-gray-900 transition-colors duration-200";
+      details.appendChild(summary);
+
+      // Create container for properties
+      const propertiesContainer = document.createElement("div");
+      propertiesContainer.className = "pl-4";
 
       // Now iterate the properties in this group
       groupObj.properties.forEach((property) => {
         const inputField = createInputField(rule, property);
         if (inputField) {
-          groupContainer.appendChild(inputField);
+          propertiesContainer.appendChild(inputField);
         }
       });
 
+      details.appendChild(propertiesContainer);
+      groupContainer.appendChild(details);
       parentDiv.appendChild(groupContainer);
     });
 
@@ -729,18 +779,19 @@ function handleInputChange(e) {
   const currentStyle = new CSSStyleSheet();
   currentStyle.replaceSync(currentStyleUnparsed);
 
-  const newRules = Array.from(currentStyle.cssRules)
+  currentStyleContent = Array.from(currentStyle.cssRules)
     .map((rule) => {
       if (rule.cssText.includes("@keyframes")) return rule.cssText;
       if (rule.selectorText === e.target.getAttribute("rule_selector")) {
         const newValue = calculateNewValue(e.target);
+        console.log(
+          `setting ${e.target.getAttribute("property")} to ${newValue}`
+        );
         rule.style.setProperty(e.target.getAttribute("property"), newValue);
       }
       return rule.cssText;
     })
     .join("\n");
-
-  currentStyleContent = newRules;
   generateOptions(currentStyleContent);
   restartIframe(iframe);
 }
