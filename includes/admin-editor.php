@@ -9,8 +9,10 @@ flex flex-col lg:flex-row-reverse">
     </div>
 
     <!-- Controls Column -->
-    <div id="elegant-options" class="w-full lg:w-2/5 p-4 py-8 flex flex-col justify-start items-start">
-        <div class="flex flex-row justify-between items-end gap-4 mb-4 border-b-4 border-primary-light pb-4">
+    <div id="elegant-options" class="w-full lg:w-2/5 p-4 py-8 flex flex-col justify-start
+        items-start max-h-[800px] overflow-y-auto
+        scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
+        <div class=" flex flex-row justify-between items-end gap-4 mb-4 border-b-4 border-primary-light pb-4">
             <h1 class="text-4xl font-black text-primary">Elegant Loader</h1>
             <!-- Advanced Mode -->
             <label class="inline-flex items-center cursor-pointer">

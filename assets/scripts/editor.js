@@ -36,7 +36,7 @@ const allowedProperties = {
     {
       property: "background-color",
       label: "Background Color",
-      type: "gradient",
+      type: "color",
       category: "appearance",
       unit: "",
     },
@@ -87,7 +87,7 @@ const allowedProperties = {
       unit: "",
     },
     {
-      property: "background-image",
+      property: "background",
       label: "Background Gradient",
       type: "gradient",
       category: "appearance",
@@ -329,9 +329,9 @@ function createInputField(rule, propertyInfo) {
       "p-1 h-10 w-14 block bg-white border border-gray-300 cursor-pointer rounded-lg shadow-sm transition-all duration-200" +
       " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
   } else if (propertyInfo.type === "gradient") {
-    input = createGradientDiv(currentValue);
+    input = createGradientDiv(propertyInfo, rule, currentValue);
   } else if (propertyInfo.type === "range") {
-    input = createRangeInput(propertyInfo, currentValue);
+    input = createRangeInput(propertyInfo, rule, currentValue);
   } else {
     input = document.createElement("input");
     input.type = propertyInfo.type;
@@ -374,35 +374,79 @@ function createInputField(rule, propertyInfo) {
   return childDiv;
 }
 
-function createGradientDiv(value) {
+function createGradientDiv(propertyInfo, rule, value) {
   const childDiv = document.createElement("div");
-  childDiv.className = "flex items-center justify-end w-full gap-2";
+  childDiv.className =
+    "flex items-center justify-end w-full gap-2 parent-gradient";
 
   const colorRegex =
     /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})|rgba?\(\s*(\d{1,3}\s*,\s*){2,3}\d{1,3}\s*(,\s*\d+(\.\d+)?\s*)?\)/g;
+
   const colors = value.match(colorRegex) || [];
   colors.forEach((color) => {
-    const colorInput = document.createElement("input");
-    colorInput.type = "color";
-    colorInput.value = color;
-    colorInput.className =
-      "p-1 h-10 w-14 block bg-white border border-gray-300 cursor-pointer rounded-lg shadow-sm transition-all duration-200" +
-      " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
+    color = rbgToHex(color);
+    const colorInput = createGradientInput(propertyInfo, rule, color);
     childDiv.appendChild(colorInput);
+    childDiv.appendChild(colorInput);
+    colorInput.addEventListener(["change"], function (e) {
+      console.log("colorInput", colorInput);
+      handleInputChange(e);
+    });
   });
-  const plusButton = document.createElement("button");
-  plusButton.innerHTML = "+";
-  plusButton.className =
-    "px-2 py-1 text-gray-500 hover:text-blue-500 font-bold text-xl transition-colors duration-200";
-  childDiv.appendChild(plusButton);
+  if (childDiv.children.length < 4) {
+    const plusButton = document.createElement("button");
+    plusButton.innerHTML = "+";
+    plusButton.className =
+      "px-2 py-1 text-gray-500 hover:text-blue-500 font-bold text-xl transition-colors duration-200";
+    plusButton.addEventListener("click", function () {
+      const newInput = createGradientInput(propertyInfo, rule, "#000000");
+      newInput.addEventListener(["change"], function (e) {
+        handleInputChange(e);
+      });
+      childDiv.insertBefore(newInput, childDiv.lastElementChild);
+      newInput.dispatchEvent(new Event("change", { target: newInput }));
+    });
+    childDiv.appendChild(plusButton);
+  }
   return childDiv;
 }
 
-function createRangeInput(propertyInfo, value) {
+function createGradientInput(propertyInfo, rule, value) {
+  const wrapper = document.createElement("div");
+  wrapper.attributes.property = propertyInfo.property;
+  wrapper.attributes.rule_selector = rule.selectorText;
+  wrapper.className = "gradient-wrapper relative";
+
+  const input = document.createElement("input");
+  input.attributes.property = propertyInfo.property;
+  input.attributes.rule_selector = rule.selectorText;
+  input.type = "color";
+  input.value = value;
+  input.className =
+    "p-1 h-10 w-14 block bg-white border border-gray-300 cursor-pointer rounded-lg shadow-sm transition-all duration-200" +
+    " disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.innerHTML = "×";
+  deleteButton.className =
+    "absolute -top-1 -right-1 w-3 h-3 text-xs font-bold bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer";
+  deleteButton.addEventListener("click", (e) => {
+    wrapper.remove();
+    handleInputChange(e);
+  });
+
+  wrapper.appendChild(input);
+  wrapper.appendChild(deleteButton);
+  return wrapper;
+}
+
+function createRangeInput(propertyInfo, rule, value) {
   const input = document.createElement("input");
   input.type = "range";
   input.min = propertyInfo.min;
   input.max = propertyInfo.max;
+  input.attributes.rule_selector = rule.selectorText;
+  input.attributes.property = propertyInfo.property;
   input.className =
     "h-2 w-44 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg appearance-none cursor-pointer";
   input.style.outline = "none";
@@ -415,6 +459,18 @@ function createRangeInput(propertyInfo, value) {
   );
   input.value = String(initialValue);
   return input;
+}
+
+function rbgToHex(rgb) {
+  if (rgb.startsWith("#")) return rgb;
+  const rgbArray = rgb.match(/\d+/g);
+  const hex = rgbArray
+    .map((value) => {
+      const hexValue = parseInt(value).toString(16);
+      return hexValue.length === 1 ? `0${hexValue}` : hexValue;
+    })
+    .join("");
+  return `#${hex}`;
 }
 
 function generateOptions(currentStyleContent) {
@@ -498,6 +554,81 @@ function getInitialValue(selector, property) {
     ?.style.getPropertyValue(property);
 }
 
+/** Set the value to the new value with the unit and by string interpolation for the gradient */
+function calculateNewValue(target) {
+  const propertyInfo = [
+    ...allowedProperties.basic,
+    ...allowedProperties.advanced,
+  ].find((prop) => prop.property === target.attributes.property);
+  if (propertyInfo.type === "gradient") {
+    const parentDiv = target.closest(".parent-gradient");
+    console.log(parentDiv);
+    const colors = Array.from(parentDiv.querySelectorAll("input")).map(
+      (child) => child.value
+    );
+    console.log(colors);
+    if (colors.length === 1) {
+      return `linear-gradient(90deg, ${colors[0]} 0%, ${colors[0]} 100%)`;
+    }
+    const newGradient = `linear-gradient(90deg, ${colors
+      .map(
+        (color, index) =>
+          `${color} ${
+            isNaN((index * 100) / (colors.length - 1))
+              ? 100
+              : (index * 100) / (colors.length - 1)
+          }%`
+      )
+      .join(", ")})`;
+    return newGradient;
+  } else {
+    return (
+      target.value +
+      ((target.attributes.property &&
+        [...allowedProperties.basic, ...allowedProperties.advanced].find(
+          (prop) => prop.property === target.attributes.property
+        )?.unit) ||
+        "")
+    );
+  }
+}
+
+/** Handle the input change
+ * @param {Event} e - The event object
+ */
+function handleInputChange(e) {
+  const iframe = document.getElementById("previewFrame");
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+  // Get the current style content
+  const currentStyleUnparsed = doc.querySelector("style")?.innerHTML || "";
+  const currentStyle = new CSSStyleSheet();
+  currentStyle.replaceSync(currentStyleUnparsed);
+
+  // Create new CSS content
+  let newRules = Array.from(currentStyle.cssRules)
+    .map((rule) => {
+      if (rule.cssText.includes("@keyframes")) return rule.cssText;
+      if (rule.selectorText === e.target.attributes.rule_selector) {
+        const newValue = calculateNewValue(e.target);
+        console.log(
+          `Changing ${e.target.attributes.property} to ${newValue} of rule ${rule.selectorText}`
+        );
+        if (!rule.style) {
+          rule.style = document.createElement("div").style;
+        }
+        rule.style.setProperty(e.target.attributes.property, newValue);
+      }
+      return rule.cssText;
+    })
+    .join("\n");
+
+  // Update both the iframe and current style content
+  currentStyleContent = newRules;
+  generateOptions(currentStyleContent);
+  restartIframe(iframe);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   initialStyle =
     document
@@ -569,44 +700,8 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
   const inputFields = document.querySelectorAll("input");
   inputFields.forEach((input) => {
-    input.addEventListener("change", (e) => {
-      const iframe = document.getElementById("previewFrame");
-      const doc = iframe.contentDocument || iframe.contentWindow.document;
-      // Get the current style content
-      const currentStyleUnparsed = doc.querySelector("style")?.innerHTML || "";
-      const currentStyle = new CSSStyleSheet();
-      currentStyle.replaceSync(currentStyleUnparsed);
-
-      // Create new CSS content
-      let newRules = Array.from(currentStyle.cssRules)
-        .map((rule) => {
-          if (rule.cssText.includes("@keyframes")) return rule.cssText;
-          if (rule.selectorText === e.target.attributes.rule_selector) {
-            if (!rule.style) {
-              rule.style = document.createElement("div").style;
-            }
-            console.log("property", e.target.attributes.property);
-            rule.style.setProperty(
-              e.target.attributes.property,
-              e.target.value +
-                ((e.target.attributes.property &&
-                  [
-                    ...allowedProperties.basic,
-                    ...allowedProperties.advanced,
-                  ].find(
-                    (prop) => prop.property === e.target.attributes.property
-                  )?.unit) ||
-                  "")
-            );
-          }
-          return rule.cssText;
-        })
-        .join("\n");
-
-      // Update both the iframe and current style content
-      currentStyleContent = newRules;
-      generateOptions(currentStyleContent);
-      restartIframe(iframe);
+    input.addEventListener(["change", "input"], (e) => {
+      handleInputChange(e);
     });
   });
 });
