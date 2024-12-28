@@ -4,5 +4,4 @@
     $svg_content = str_replace('<svg', '<svg class="elegant-loader-svg"', $svg_content);
     echo $svg_content;
     ?>
-    <div class="elegant-loader-content">Loading...</div>
 </div>

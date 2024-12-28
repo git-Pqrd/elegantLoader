@@ -2,6 +2,8 @@ let currentStyleContent = "";
 let initialStyle = "";
 let isAdvanced = false;
 
+// Default values for certain CSS properties.
+// If a property is set to this value or "initial", we consider it "unused".
 const defaultValues = {
   "background-color": "#ffffff",
   color: "#000000",
@@ -31,186 +33,257 @@ const defaultValues = {
   "stroke-linecap": "butt",
 };
 
+/**
+ * GROUPED PROPERTIES
+ *
+ * We now group properties under high-level headings (e.g., “Background”, “Size”, etc.)
+ * Each group is an object with:
+ *   - group: The name (string)
+ *   - properties: An array of property objects (property, label, type, etc.)
+ */
 const allowedProperties = {
   basic: [
     {
-      property: "background-color",
-      label: "Background Color",
-      type: "color",
-      category: "appearance",
-      unit: "",
+      group: "Background",
+      properties: [
+        {
+          property: "background",
+          label: "Background Gradient",
+          type: "gradient",
+          category: "appearance",
+          unit: "",
+        },
+        {
+          property: "background-color",
+          label: "Background Color",
+          type: "color",
+          category: "appearance",
+          unit: "",
+        },
+      ],
     },
     {
-      property: "color",
-      label: "Text Color",
-      type: "color",
-      category: "appearance",
-      unit: "",
+      group: "Size",
+      properties: [
+        {
+          property: "width",
+          label: "Width",
+          type: "range",
+          min: 0,
+          max: 100,
+          category: "size",
+          unit: "%",
+        },
+        {
+          property: "height",
+          label: "Height",
+          type: "range",
+          min: 0,
+          max: 100,
+          category: "size",
+          unit: "%",
+        },
+      ],
     },
     {
-      property: "width",
-      label: "Width",
-      type: "range",
-      min: 0,
-      max: 100,
-      category: "size",
-      unit: "%",
-    },
-    {
-      property: "height",
-      label: "Height",
-      type: "range",
-      min: 0,
-      max: 100,
-      category: "size",
-      unit: "%",
-    },
-    {
-      property: "border-radius",
-      label: "Border Radius",
-      type: "text",
-      category: "appearance",
-      unit: "px",
-    },
-    {
-      property: "stroke",
-      label: "Stroke Color",
-      type: "color",
-      category: "svg",
-      unit: "",
-    },
-    {
-      property: "fill",
-      label: "Fill Color",
-      type: "color",
-      category: "svg",
-      unit: "",
-    },
-    {
-      property: "background",
-      label: "Background Gradient",
-      type: "gradient",
-      category: "appearance",
-      unit: "",
-    },
-    {
-      property: "overflow",
-      label: "Overflow",
-      type: "select",
-      options: ["visible", "hidden", "scroll", "auto"],
-      category: "appearance",
-      unit: "",
+      group: "SVG",
+      properties: [
+        {
+          property: "stroke",
+          label: "Stroke Color",
+          type: "color",
+          category: "svg",
+          unit: "",
+        },
+        {
+          property: "fill",
+          label: "Fill Color",
+          type: "color",
+          category: "svg",
+          unit: "",
+        },
+      ],
     },
   ],
   advanced: [
     {
-      property: "border-color",
-      label: "Border Color",
-      type: "color",
-      category: "border",
-      unit: "",
+      group: "Appearance",
+      properties: [
+        {
+          property: "color",
+          label: "Text Color",
+          type: "color",
+          category: "appearance",
+          unit: "",
+        },
+        {
+          property: "border-radius",
+          label: "Border Radius",
+          type: "text",
+          category: "appearance",
+          unit: "px",
+        },
+        {
+          property: "overflow",
+          label: "Overflow",
+          type: "select",
+          options: ["visible", "hidden", "scroll", "auto"],
+          category: "appearance",
+          unit: "",
+        },
+      ],
     },
     {
-      property: "border-width",
-      label: "Border Width",
-      type: "text",
-      category: "border",
-      unit: "px",
+      group: "Spacing",
+      properties: [
+        {
+          property: "margin",
+          label: "Margin",
+          type: "range",
+          min: 0,
+          max: 100,
+          category: "spacing",
+          unit: "px",
+        },
+        {
+          property: "padding",
+          label: "Padding",
+          type: "range",
+          min: 0,
+          max: 100,
+          category: "spacing",
+          unit: "px",
+        },
+      ],
     },
     {
-      property: "margin",
-      label: "Margin",
-      type: "text",
-      category: "spacing",
-      unit: "px",
+      group: "Border",
+      properties: [
+        {
+          property: "border-color",
+          label: "Border Color",
+          type: "color",
+          category: "border",
+          unit: "",
+        },
+        {
+          property: "border-width",
+          label: "Border Width",
+          type: "range",
+          min: 0,
+          max: 10,
+          category: "border",
+          unit: "px",
+        },
+      ],
     },
     {
-      property: "padding",
-      label: "Padding",
-      type: "text",
-      category: "spacing",
-      unit: "px",
+      group: "Typography",
+      properties: [
+        {
+          property: "font-size",
+          label: "Font Size",
+          type: "range",
+          min: 0,
+          max: 100,
+          category: "typography",
+          unit: "px",
+        },
+        {
+          property: "font-weight",
+          label: "Font Weight",
+          type: "range",
+          min: 100,
+          max: 900,
+          category: "typography",
+          unit: "",
+        },
+        {
+          property: "text-align",
+          label: "Text Align",
+          type: "select",
+          options: ["left", "center", "right"],
+          category: "typography",
+          unit: "",
+        },
+        {
+          property: "text-transform",
+          label: "Text Transform",
+          type: "select",
+          options: ["none", "uppercase", "lowercase", "capitalize"],
+          category: "typography",
+          unit: "",
+        },
+      ],
     },
     {
-      property: "font-size",
-      label: "Font Size",
-      type: "text",
-      category: "typography",
-      unit: "px",
+      group: "Animation",
+      properties: [
+        {
+          property: "animation-duration",
+          label: "Animation Duration",
+          type: "range",
+          min: 0,
+          max: 10,
+          category: "animation",
+          unit: "s",
+        },
+        {
+          property: "animation-iteration-count",
+          label: "Animation Repeat",
+          type: "text",
+          category: "animation",
+          unit: "",
+        },
+        {
+          property: "animation-timing-function",
+          label: "Animation Timing",
+          type: "select",
+          options: ["linear", "ease", "ease-in", "ease-out", "ease-in-out"],
+          category: "animation",
+          unit: "",
+        },
+      ],
     },
     {
-      property: "font-weight",
-      label: "Font Weight",
-      type: "text",
-      category: "typography",
-      unit: "",
-    },
-    {
-      property: "text-align",
-      label: "Text Align",
-      type: "select",
-      options: ["left", "center", "right"],
-      category: "typography",
-      unit: "",
-    },
-    {
-      property: "text-transform",
-      label: "Text Transform",
-      type: "select",
-      options: ["none", "uppercase", "lowercase", "capitalize"],
-      category: "typography",
-      unit: "",
-    },
-    {
-      property: "animation-duration",
-      label: "Animation Duration",
-      type: "text",
-      category: "animation",
-      unit: "s",
-    },
-    {
-      property: "animation-iteration-count",
-      label: "Animation Repeat",
-      type: "text",
-      category: "animation",
-      unit: "",
-    },
-    {
-      property: "animation-timing-function",
-      label: "Animation Timing",
-      type: "select",
-      options: ["linear", "ease", "ease-in", "ease-out", "ease-in-out"],
-      category: "animation",
-      unit: "",
-    },
-    {
-      property: "stroke-dasharray",
-      label: "Stroke Dash Array",
-      type: "text",
-      category: "svg",
-      unit: "px",
-    },
-    {
-      property: "stroke-dashoffset",
-      label: "Stroke Dash Offset",
-      type: "text",
-      category: "svg",
-      unit: "px",
-    },
-    {
-      property: "stroke-width",
-      label: "Stroke Width",
-      type: "text",
-      category: "svg",
-      unit: "px",
-    },
-    {
-      property: "stroke-linecap",
-      label: "Stroke Line Cap",
-      type: "select",
-      options: ["butt", "round", "square"],
-      category: "svg",
-      unit: "",
+      group: "SVG (Advanced)",
+      properties: [
+        {
+          property: "stroke-dasharray",
+          label: "Stroke Dash Array",
+          type: "range",
+          min: 0,
+          max: 100,
+          category: "svg",
+          unit: "px",
+        },
+        {
+          property: "stroke-dashoffset",
+          label: "Stroke Dash Offset",
+          type: "range",
+          min: 0,
+          max: 100,
+          category: "svg",
+          unit: "px",
+        },
+        {
+          property: "stroke-width",
+          label: "Stroke Width",
+          type: "range",
+          min: 0,
+          max: 10,
+          category: "svg",
+          unit: "px",
+        },
+        {
+          property: "stroke-linecap",
+          label: "Stroke Line Cap",
+          type: "select",
+          options: ["butt", "round", "square"],
+          category: "svg",
+          unit: "",
+        },
+      ],
     },
   ],
 };
@@ -222,31 +295,42 @@ function filteredCssRules(rules) {
   );
 }
 
+/**
+ * Creates the UI for each property (label + input(s)).
+ * We add a small "Used" checkmark if currentValue differs
+ * from default/initial.
+ */
 function createInputField(rule, propertyInfo) {
+  // Check if property is set or still default/initial
   const currentValue =
     rule.style.getPropertyValue(propertyInfo.property) ||
     defaultValues[propertyInfo.property] ||
     "initial";
+  const isPropertySet = currentValue !== "" && currentValue !== "initial";
 
   const childDiv = document.createElement("div");
   childDiv.className =
     "flex items-center justify-between w-full p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200";
 
-  // Add a wrapper for the input and ignore button
+  // If this property is "used", highlight row or add a checkmark
+  if (isPropertySet) {
+    // You could highlight the background or border
+    childDiv.classList.add("bg-green-50");
+  }
+
+  // A wrapper for the input (or gradient inputs)
   const inputWrapper = document.createElement("div");
   inputWrapper.className = "flex items-center gap-2 h-10";
 
+  // The "ignore" (remove) button
   const iframe = document.getElementById("previewFrame");
-  // Create ignore button
   const ignoreButton = document.createElement("button");
   ignoreButton.innerHTML = "\u274C";
   ignoreButton.className =
     "px-2 h-full mr-2 text-gray-500 hover:text-red-500 font-bold text-sm transition-colors duration-200";
   ignoreButton.title = "Remove this property";
-  ignoreButton.attributes = {
-    rule_selector: rule.selectorText,
-    property: propertyInfo.property,
-  };
+  ignoreButton.setAttribute("rule_selector", rule.selectorText);
+  ignoreButton.setAttribute("property", propertyInfo.property);
   ignoreButton.addEventListener("click", function () {
     rule.style.removeProperty(propertyInfo.property);
 
@@ -262,26 +346,20 @@ function createInputField(rule, propertyInfo) {
       })
       .join("\n");
 
-    // Regenerate options and restart iframe
     generateOptions(currentStyleContent);
     restartIframe(iframe);
   });
 
-  // create a button to reset the property initial value
+  // Reset button
   const resetButton = document.createElement("button");
   resetButton.innerHTML = "↺";
   resetButton.className =
     "px-2 py-1 text-gray-500 hover:text-blue-500 font-bold text-xl transition-colors duration-200";
   resetButton.title = "Reset this property to its initial value";
   resetButton.addEventListener("click", function () {
-    // Get the initial value from the initialStyle
-    const initialValue = getInitialValue(
-      rule.selectorText,
-      propertyInfo.property
-    );
-
-    if (initialValue) {
-      rule.style.setProperty(propertyInfo.property, initialValue);
+    const initVal = getInitialValue(rule.selectorText, propertyInfo.property);
+    if (initVal) {
+      rule.style.setProperty(propertyInfo.property, initVal);
 
       // Update currentStyleContent
       const css = new CSSStyleSheet();
@@ -295,12 +373,12 @@ function createInputField(rule, propertyInfo) {
         })
         .join("\n");
 
-      // Regenerate options and restart iframe
       generateOptions(currentStyleContent);
       restartIframe(iframe);
     }
   });
 
+  // Label
   const label = document.createElement("label");
   label.textContent = propertyInfo.label + ": ";
   label.style.setProperty("min-width", "150px");
@@ -308,8 +386,8 @@ function createInputField(rule, propertyInfo) {
   label.className =
     "w-1/3 text-md font-semibold text-gray-700 items-center flex";
 
+  // Determine which input to create
   let input;
-
   if (propertyInfo.type === "select") {
     input = document.createElement("select");
     input.className =
@@ -318,7 +396,9 @@ function createInputField(rule, propertyInfo) {
       const optionElement = document.createElement("option");
       optionElement.value = option;
       optionElement.textContent = option;
-      optionElement.selected = option === currentValue;
+      if (option === currentValue.trim()) {
+        optionElement.selected = true;
+      }
       input.appendChild(optionElement);
     });
   } else if (propertyInfo.type === "color") {
@@ -333,47 +413,44 @@ function createInputField(rule, propertyInfo) {
   } else if (propertyInfo.type === "range") {
     input = createRangeInput(propertyInfo, rule, currentValue);
   } else {
+    // Default: e.g. type="text", etc.
     input = document.createElement("input");
     input.type = propertyInfo.type;
     input.className =
       "h-10 w-44 px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200";
-  }
-  if (input.type !== "select" && !input.value) {
     input.value = currentValue;
   }
-  input.attributes.rule_selector = rule.selectorText;
-  input.attributes.property = propertyInfo.property;
-  // create a wrapper for the label and the buttons
+
+  // Make sure the input has references to the rule & property
+  input.setAttribute("rule_selector", rule.selectorText);
+  input.setAttribute("property", propertyInfo.property);
+
+  // Label + Buttons Container
   const labelWrapper = document.createElement("div");
   labelWrapper.className = "flex items-center gap-2 align-middle";
-  const initialValue = getInitialValue(
-    rule.selectorText,
-    propertyInfo.property
-  );
-  if (initialValue && initialValue !== currentValue) {
+
+  // If the initial value is different, show reset button
+  const initVal = getInitialValue(rule.selectorText, propertyInfo.property);
+  if (initVal && initVal !== currentValue) {
     labelWrapper.appendChild(resetButton);
   }
   labelWrapper.appendChild(ignoreButton);
   labelWrapper.appendChild(label);
   childDiv.appendChild(labelWrapper);
 
-  // Add visual indicator if property is set to initial or default value
-  if (
-    currentValue === "initial" ||
-    currentValue === defaultValues[propertyInfo.property]
-  ) {
+  // Dim the input if it’s “initial” or default
+  if (!isPropertySet) {
     inputWrapper.classList.add("opacity-50");
-    // Not adding to the ctas
-    childDiv.lastElementChild.classList.add("opacity-50");
+    childDiv.lastElementChild?.classList.add("opacity-50");
   }
-  // add input to the input wrapper
-  inputWrapper.appendChild(input);
 
+  inputWrapper.appendChild(input);
   childDiv.appendChild(inputWrapper);
 
   return childDiv;
 }
 
+/** Create gradient color inputs for "background: linear-gradient(...)" */
 function createGradientDiv(propertyInfo, rule, value) {
   const childDiv = document.createElement("div");
   childDiv.className =
@@ -381,18 +458,16 @@ function createGradientDiv(propertyInfo, rule, value) {
 
   const colorRegex =
     /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})|rgba?\(\s*(\d{1,3}\s*,\s*){2,3}\d{1,3}\s*(,\s*\d+(\.\d+)?\s*)?\)/g;
-
   const colors = value.match(colorRegex) || [];
+
   colors.forEach((color) => {
     color = rbgToHex(color);
     const colorInput = createGradientInput(propertyInfo, rule, color);
     childDiv.appendChild(colorInput);
-    childDiv.appendChild(colorInput);
-    colorInput.addEventListener(["change"], function (e) {
-      console.log("colorInput", colorInput);
-      handleInputChange(e);
-    });
+    colorInput.addEventListener("change", handleInputChange);
   });
+
+  // Optionally limit # of color stops. Right now, we allow up to 2 stops + a button.
   if (childDiv.children.length < 4) {
     const plusButton = document.createElement("button");
     plusButton.innerHTML = "+";
@@ -400,26 +475,26 @@ function createGradientDiv(propertyInfo, rule, value) {
       "px-2 py-1 text-gray-500 hover:text-blue-500 font-bold text-xl transition-colors duration-200";
     plusButton.addEventListener("click", function () {
       const newInput = createGradientInput(propertyInfo, rule, "#000000");
-      newInput.addEventListener(["change"], function (e) {
-        handleInputChange(e);
-      });
+      newInput.addEventListener("change", handleInputChange);
       childDiv.insertBefore(newInput, childDiv.lastElementChild);
-      newInput.dispatchEvent(new Event("change", { target: newInput }));
+      // Trigger change so the gradient is recalculated
+      newInput.dispatchEvent(new Event("change"));
     });
     childDiv.appendChild(plusButton);
   }
+
   return childDiv;
 }
 
 function createGradientInput(propertyInfo, rule, value) {
   const wrapper = document.createElement("div");
-  wrapper.attributes.property = propertyInfo.property;
-  wrapper.attributes.rule_selector = rule.selectorText;
+  wrapper.setAttribute("property", propertyInfo.property);
+  wrapper.setAttribute("rule_selector", rule.selectorText);
   wrapper.className = "gradient-wrapper relative";
 
   const input = document.createElement("input");
-  input.attributes.property = propertyInfo.property;
-  input.attributes.rule_selector = rule.selectorText;
+  input.setAttribute("property", propertyInfo.property);
+  input.setAttribute("rule_selector", rule.selectorText);
   input.type = "color";
   input.value = value;
   input.className =
@@ -430,9 +505,13 @@ function createGradientInput(propertyInfo, rule, value) {
   deleteButton.innerHTML = "×";
   deleteButton.className =
     "absolute -top-1 -right-1 w-3 h-3 text-xs font-bold bg-red-600 text-white rounded-full flex items-center justify-center cursor-pointer";
-  deleteButton.addEventListener("click", (e) => {
+  deleteButton.addEventListener("click", () => {
+    const parentDiv = wrapper.closest(".parent-gradient");
     wrapper.remove();
-    handleInputChange(e);
+    // Force a recalculation of the gradient
+    const event = new Event("change");
+    event.target = parentDiv.querySelector("input");
+    handleInputChange(event);
   });
 
   wrapper.appendChild(input);
@@ -440,39 +519,79 @@ function createGradientInput(propertyInfo, rule, value) {
   return wrapper;
 }
 
+/** Create a "range + numeric" combined input for easier UX. */
 function createRangeInput(propertyInfo, rule, value) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "flex items-center gap-2";
+
   const input = document.createElement("input");
   input.type = "range";
   input.min = propertyInfo.min;
   input.max = propertyInfo.max;
-  input.attributes.rule_selector = rule.selectorText;
-  input.attributes.property = propertyInfo.property;
+  input.setAttribute("rule_selector", rule.selectorText);
+  input.setAttribute("property", propertyInfo.property);
   input.className =
-    "h-2 w-44 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg appearance-none cursor-pointer";
+    "h-2 w-32 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg appearance-none cursor-pointer";
   input.style.outline = "none";
 
-  // Parse initial value and handle invalid values
-  let initialValue = parseInt(value) || 0;
+  const numericInput = document.createElement("input");
+  numericInput.type = "number";
+  numericInput.min = propertyInfo.min;
+  numericInput.max = propertyInfo.max;
+  numericInput.setAttribute("rule_selector", rule.selectorText);
+  numericInput.setAttribute("property", propertyInfo.property);
+  numericInput.className =
+    "w-16 h-10 px-2 py-1 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
+
+  // Use the current value or fall back to 0 if invalid
+  let initialValue = parseInt(value, 10) || 0;
   initialValue = Math.max(
     propertyInfo.min,
     Math.min(propertyInfo.max, initialValue)
   );
+
   input.value = String(initialValue);
-  return input;
+  numericInput.value = String(initialValue);
+
+  const unitLabel = document.createElement("span");
+  unitLabel.textContent = propertyInfo.unit;
+  unitLabel.className = "text-sm text-gray-600";
+
+  // Sync range <-> numeric
+  input.addEventListener("change", (e) => {
+    numericInput.value = e.target.value;
+    handleInputChange(e);
+  });
+
+  numericInput.addEventListener("input", (e) => {
+    input.value = e.target.value;
+    handleInputChange(e);
+  });
+
+  wrapper.appendChild(input);
+  wrapper.appendChild(numericInput);
+  wrapper.appendChild(unitLabel);
+
+  return wrapper;
 }
 
 function rbgToHex(rgb) {
   if (rgb.startsWith("#")) return rgb;
   const rgbArray = rgb.match(/\d+/g);
+  if (!rgbArray) return rgb; // Malformed string fallback
   const hex = rgbArray
     .map((value) => {
-      const hexValue = parseInt(value).toString(16);
+      const hexValue = parseInt(value, 10).toString(16);
       return hexValue.length === 1 ? `0${hexValue}` : hexValue;
     })
     .join("");
   return `#${hex}`;
 }
 
+/**
+ * Generate the property editors for each CSS rule.
+ * We now iterate groups, then each property in that group.
+ */
 function generateOptions(currentStyleContent) {
   const optionsContainer = document.getElementById("elegant-options-container");
   if (!optionsContainer) return;
@@ -481,71 +600,87 @@ function generateOptions(currentStyleContent) {
   css.replaceSync(currentStyleContent);
   optionsContainer.innerHTML = "";
 
-  // Create input fields based on CSS properties
+  // For each valid CSS rule, build out property controls
   Array.from(filteredCssRules(css.cssRules)).forEach((rule) => {
-    let parentDiv = document.createElement("div");
-
-    // Create section title
+    const parentDiv = document.createElement("div");
     parentDiv.className =
       "flex items-start flex-col justify-between w-full my-6 pb-4 bg-white rounded-xl shadow-sm p-4";
+
+    // Show the CSS selector at the top
     const sectionTitle = document.createElement("h2");
     sectionTitle.textContent = rule?.selectorText;
     sectionTitle.className =
       "text-2xl font-semibold text-gray-800 py-3 w-full border-b border-gray-200 mb-4";
     parentDiv.appendChild(sectionTitle);
 
-    const allProperties = [
-      ...allowedProperties.basic,
-      ...(isAdvanced ? allowedProperties.advanced : []),
-    ];
-    Array.from(allProperties).forEach((property) => {
-      const inputField = createInputField(rule, property);
-      if (inputField) {
-        parentDiv.appendChild(inputField);
-      }
+    // Combine the basic groups if not advanced, or both if advanced
+    const allGroups = isAdvanced
+      ? [...allowedProperties.basic, ...allowedProperties.advanced]
+      : [...allowedProperties.basic];
+
+    // For each group, create a sub-section
+    allGroups.forEach((groupObj) => {
+      const groupContainer = document.createElement("div");
+      groupContainer.className = "w-full my-2 pl-4 border-l-2 border-gray-200";
+
+      // Group heading
+      const groupTitle = document.createElement("h3");
+      groupTitle.textContent = groupObj.group;
+      groupTitle.className = "text-xl font-semibold mb-2 text-gray-700";
+      groupContainer.appendChild(groupTitle);
+
+      // Now iterate the properties in this group
+      groupObj.properties.forEach((property) => {
+        const inputField = createInputField(rule, property);
+        if (inputField) {
+          groupContainer.appendChild(inputField);
+        }
+      });
+
+      parentDiv.appendChild(groupContainer);
     });
 
     optionsContainer.appendChild(parentDiv);
   });
 }
 
+/** Rebuilds the iframe with updated CSS. */
 function restartIframe(iframe) {
   if (!iframe) return;
   try {
-    // Get the iframe document
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
     const bodyContent = iframeDoc.body.innerHTML;
-    // Recreate the document content
+
     iframeDoc.open();
     iframeDoc.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <style>
-                ${currentStyleContent}
-              </style>
-            </head>
-            <body>
-              ${bodyContent}
-            </body>
-          </html>
-        `);
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            ${currentStyleContent}
+          </style>
+        </head>
+        <body>
+          ${bodyContent}
+        </body>
+      </html>
+    `);
     iframeDoc.close();
 
-    // Force a repaint (optional, but can help with some animations)
+    // Force a reflow
     iframe.style.display = "none";
-    iframe.offsetHeight; // Force reflow
+    // eslint-disable-next-line no-unused-expressions
+    iframe.offsetHeight;
     iframe.style.display = "";
   } catch (error) {
     console.error("Error restarting iframe:", error);
-
-    // Alternative method: reload the iframe src
     if (iframe.src) {
       iframe.src = iframe.src;
     }
   }
 }
 
+/** Retrieve the *initial* (original) value of a property, if any. */
 function getInitialValue(selector, property) {
   const css = new CSSStyleSheet();
   css.replaceSync(initialStyle);
@@ -554,112 +689,90 @@ function getInitialValue(selector, property) {
     ?.style.getPropertyValue(property);
 }
 
-/** Set the value to the new value with the unit and by string interpolation for the gradient */
+/** Decide how to interpret the new input value before applying it. */
 function calculateNewValue(target) {
   const propertyInfo = [
-    ...allowedProperties.basic,
-    ...allowedProperties.advanced,
-  ].find((prop) => prop.property === target.attributes.property);
+    ...allowedProperties.basic.flatMap((g) => g.properties),
+    ...allowedProperties.advanced.flatMap((g) => g.properties),
+  ].find((prop) => prop.property === target.getAttribute("property"));
+
+  if (!propertyInfo) return target.value;
+
+  // If it's a gradient property, combine all child color inputs into a single gradient
   if (propertyInfo.type === "gradient") {
     const parentDiv = target.closest(".parent-gradient");
-    console.log(parentDiv);
     const colors = Array.from(parentDiv.querySelectorAll("input")).map(
       (child) => child.value
     );
-    console.log(colors);
     if (colors.length === 1) {
       return `linear-gradient(90deg, ${colors[0]} 0%, ${colors[0]} 100%)`;
     }
-    const newGradient = `linear-gradient(90deg, ${colors
-      .map(
-        (color, index) =>
-          `${color} ${
-            isNaN((index * 100) / (colors.length - 1))
-              ? 100
-              : (index * 100) / (colors.length - 1)
-          }%`
-      )
+    return `linear-gradient(90deg, ${colors
+      .map((color, index) => `${color} ${(index * 100) / (colors.length - 1)}%`)
       .join(", ")})`;
-    return newGradient;
-  } else {
-    return (
-      target.value +
-      ((target.attributes.property &&
-        [...allowedProperties.basic, ...allowedProperties.advanced].find(
-          (prop) => prop.property === target.attributes.property
-        )?.unit) ||
-        "")
-    );
   }
+
+  // For non-gradient, append the unit if any
+  return target.value + (propertyInfo.unit || "");
 }
 
-/** Handle the input change
- * @param {Event} e - The event object
+/**
+ * Called whenever the user changes any input (color, range, text, etc.).
+ * Applies the updated CSS to the iframe.
  */
 function handleInputChange(e) {
   const iframe = document.getElementById("previewFrame");
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  if (!iframe) return;
 
-  // Get the current style content
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
   const currentStyleUnparsed = doc.querySelector("style")?.innerHTML || "";
   const currentStyle = new CSSStyleSheet();
   currentStyle.replaceSync(currentStyleUnparsed);
 
-  // Create new CSS content
-  let newRules = Array.from(currentStyle.cssRules)
+  const newRules = Array.from(currentStyle.cssRules)
     .map((rule) => {
       if (rule.cssText.includes("@keyframes")) return rule.cssText;
-      if (rule.selectorText === e.target.attributes.rule_selector) {
+      if (rule.selectorText === e.target.getAttribute("rule_selector")) {
         const newValue = calculateNewValue(e.target);
-        console.log(
-          `Changing ${e.target.attributes.property} to ${newValue} of rule ${rule.selectorText}`
-        );
-        if (!rule.style) {
-          rule.style = document.createElement("div").style;
-        }
-        rule.style.setProperty(e.target.attributes.property, newValue);
+        rule.style.setProperty(e.target.getAttribute("property"), newValue);
       }
       return rule.cssText;
     })
     .join("\n");
 
-  // Update both the iframe and current style content
   currentStyleContent = newRules;
   generateOptions(currentStyleContent);
   restartIframe(iframe);
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  initialStyle =
-    document
-      .getElementById("previewFrame")
-      .contentDocument.querySelector("style")?.innerHTML || "";
-  // Set the initial style content to the initial style
-  currentStyleContent = initialStyle;
-  generateOptions(currentStyleContent);
-});
+// -----------------------------------
+// Initialization & Event Listeners
+// -----------------------------------
 
 document.addEventListener("DOMContentLoaded", function () {
   const iframe = document.getElementById("previewFrame");
+  if (!iframe) return;
+
+  // Capture the original <style> from the iframe as the "initial" style
+  initialStyle =
+    iframe.contentDocument?.querySelector("style")?.innerHTML || "";
+
+  // Start with the initial style
+  currentStyleContent = initialStyle;
+  generateOptions(currentStyleContent);
+
+  // Restart animation
   const restartIframeButton = document.getElementById(
     "restart-animation-button"
   );
+  restartIframeButton?.addEventListener("click", () => restartIframe(iframe));
 
-  if (iframe) {
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    styleContent = iframeDoc.querySelector("style")?.innerHTML || "";
-  }
-
-  restartIframeButton?.addEventListener("click", function () {
-    restartIframe(iframe);
-  });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
+  // Save button
   const saveButton = document.getElementById("save-button");
-  saveButton?.addEventListener(["click"], function (event) {
+  saveButton?.addEventListener("click", function (event) {
     event.preventDefault();
     saveButton.classList.add("loading");
+
     jQuery.ajax({
       url: ajaxurl,
       type: "POST",
@@ -672,53 +785,36 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       success: function (response) {
         saveButton.classList.remove("loading");
-        alert("The loader has been saved successfully");
+        alert(
+          "The loader has been saved successfully. It might take up to 30 seconds to apply on your site."
+        );
+        // Reload the page without ?should_show_editor=true
         window.location.href =
           window.location.href.split("?")[0] +
           "?" +
           window.location.href
             .split("?")[1]
             .replace("should_show_editor=true", "");
-        // Parse response if it's a string
-        if (typeof response === "string") {
-          try {
-            response = JSON.parse(response);
-          } catch (e) {
-            console.error("Failed to parse response:", e);
-          }
-        }
       },
       error: function (xhr, status, error) {
         saveButton.classList.remove("loading");
-        console.error("AJAX Error:", { xhr, status, error }); // Log error details
+        console.error("AJAX Error:", { xhr, status, error });
         alert("Unable to save CSS. Please check console for details.");
       },
     });
   });
-});
 
-document.addEventListener("DOMContentLoaded", function () {
-  const inputFields = document.querySelectorAll("input");
-  inputFields.forEach((input) => {
-    input.addEventListener(["change", "input"], (e) => {
-      handleInputChange(e);
-    });
-  });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
+  // Toggle Advanced mode
   const advancedModeToggle = document.getElementById("advanced-mode-toggle");
   advancedModeToggle?.addEventListener("change", function () {
     isAdvanced = !isAdvanced;
     generateOptions(currentStyleContent);
   });
-});
 
-document.addEventListener("DOMContentLoaded", function () {
+  // Reset Loader
   const resetLoaderButton = document.getElementById("reset-loader-button");
   resetLoaderButton?.addEventListener("click", function (e) {
     e.preventDefault();
-    const iframe = document.getElementById("previewFrame");
     if (
       confirm(
         "Are you sure you want to reset the loader? All changes will be lost."
@@ -729,15 +825,8 @@ document.addEventListener("DOMContentLoaded", function () {
       restartIframe(iframe);
     }
   });
-});
 
-// Prevent form from submitting
-document.addEventListener("DOMContentLoaded", function () {
+  // Prevent form submission
   const form = document.getElementById("elegant-options");
-  if (form) {
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      return false;
-    });
-  }
+  form?.addEventListener("submit", (e) => e.preventDefault());
 });
