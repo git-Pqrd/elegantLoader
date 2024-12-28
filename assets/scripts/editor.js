@@ -45,7 +45,7 @@ const allowedProperties = {
   basic: [
     {
       group: "Background",
-      showFor: ["*"],
+      showFor: ["container"],
       properties: [
         {
           property: "background",
@@ -64,8 +64,28 @@ const allowedProperties = {
       ],
     },
     {
+      group: "Path",
+      showFor: ["path"],
+      properties: [
+        {
+          property: "stroke",
+          label: "Stroke Color",
+          type: "color",
+          category: "svg",
+          unit: "",
+        },
+        {
+          property: "fill",
+          label: "Fill Color",
+          type: "color",
+          category: "svg",
+          unit: "",
+        },
+      ],
+    },
+    {
       group: "Size",
-      showFor: ["*"],
+      showFor: ["svg"],
       properties: [
         {
           property: "width",
@@ -88,21 +108,24 @@ const allowedProperties = {
       ],
     },
     {
-      group: "SVG",
-      showFor: ["svg"],
+      group: "Animation",
+      showFor: ["*"],
       properties: [
         {
-          property: "stroke",
-          label: "Stroke Color",
-          type: "color",
-          category: "svg",
-          unit: "",
+          property: "animation-duration",
+          label: "Animation Duration",
+          type: "range",
+          min: 0,
+          max: 10,
+          category: "animation",
+          unit: "s",
         },
         {
-          property: "fill",
-          label: "Fill Color",
-          type: "color",
-          category: "svg",
+          property: "animation-timing-function",
+          label: "Animation Timing",
+          type: "select",
+          options: ["linear", "ease", "ease-in", "ease-out", "ease-in-out"],
+          category: "animation",
           unit: "",
         },
       ],
@@ -111,7 +134,7 @@ const allowedProperties = {
   advanced: [
     {
       group: "Appearance",
-      showFor: ["*"],
+      showFor: ["svg"],
       properties: [
         {
           property: "color",
@@ -185,76 +208,46 @@ const allowedProperties = {
         },
       ],
     },
-    {
-      group: "Typography",
-      showFor: ["*"],
-      properties: [
-        {
-          property: "font-size",
-          label: "Font Size",
-          type: "range",
-          min: 0,
-          max: 100,
-          category: "typography",
-          unit: "px",
-        },
-        {
-          property: "font-weight",
-          label: "Font Weight",
-          type: "range",
-          min: 100,
-          max: 900,
-          category: "typography",
-          unit: "",
-        },
-        {
-          property: "text-align",
-          label: "Text Align",
-          type: "select",
-          options: ["left", "center", "right"],
-          category: "typography",
-          unit: "",
-        },
-        {
-          property: "text-transform",
-          label: "Text Transform",
-          type: "select",
-          options: ["none", "uppercase", "lowercase", "capitalize"],
-          category: "typography",
-          unit: "",
-        },
-      ],
-    },
-    {
-      group: "Animation",
-      showFor: ["*"],
-      properties: [
-        {
-          property: "animation-duration",
-          label: "Animation Duration",
-          type: "range",
-          min: 0,
-          max: 10,
-          category: "animation",
-          unit: "s",
-        },
-        {
-          property: "animation-iteration-count",
-          label: "Animation Repeat",
-          type: "text",
-          category: "animation",
-          unit: "",
-        },
-        {
-          property: "animation-timing-function",
-          label: "Animation Timing",
-          type: "select",
-          options: ["linear", "ease", "ease-in", "ease-out", "ease-in-out"],
-          category: "animation",
-          unit: "",
-        },
-      ],
-    },
+    // {
+    //   group: "Typography",
+    //   showFor: ["*"],
+    //   properties: [
+    //     {
+    //       property: "font-size",
+    //       label: "Font Size",
+    //       type: "range",
+    //       min: 0,
+    //       max: 100,
+    //       category: "typography",
+    //       unit: "px",
+    //     },
+    //     {
+    //       property: "font-weight",
+    //       label: "Font Weight",
+    //       type: "range",
+    //       min: 100,
+    //       max: 900,
+    //       category: "typography",
+    //       unit: "",
+    //     },
+    //     {
+    //       property: "text-align",
+    //       label: "Text Align",
+    //       type: "select",
+    //       options: ["left", "center", "right"],
+    //       category: "typography",
+    //       unit: "",
+    //     },
+    //     {
+    //       property: "text-transform",
+    //       label: "Text Transform",
+    //       type: "select",
+    //       options: ["none", "uppercase", "lowercase", "capitalize"],
+    //       category: "typography",
+    //       unit: "",
+    //     },
+    //   ],
+    // },
     {
       group: "SVG (Advanced)",
       showFor: ["svg"],
@@ -401,6 +394,9 @@ function createInputField(rule, propertyInfo) {
   let input;
   if (propertyInfo.type === "select") {
     input = document.createElement("select");
+    input.setAttribute("rule_selector", rule.selectorText);
+    input.setAttribute("property", propertyInfo.property);
+    input.addEventListener("change", handleInputChange);
     input.className =
       "w-44 h-10 px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200";
     propertyInfo.options.forEach((option) => {
@@ -488,8 +484,8 @@ function createGradientDiv(propertyInfo, rule, value) {
     colorInput.addEventListener("change", handleInputChange);
   });
 
-  // Optionally limit # of color stops. Right now, we allow up to 2 stops + a button.
-  if (childDiv.children.length < 4) {
+  // Optionally limit # of color stops. Right now, we allow up to x stops + a button.
+  if (childDiv.children.length < 6) {
     const plusButton = document.createElement("button");
     plusButton.innerHTML = "+";
     plusButton.className =

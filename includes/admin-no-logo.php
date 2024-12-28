@@ -9,13 +9,22 @@
             alt="Character illustration" class="max-h-full h-auto w-1/2 max-w-[600px] -mb-2 object-contain hidden md:block self-end" />
 
         <!-- Upload Button -->
-        <div class="absolute -bottom-10 left-4">
+        <div class="absolute -bottom-10 left-4 flex flex-row gap-4">
             <div class="upload-svg-button bg-primary rounded-lg p-4 mb-4 flex items-center gap-2 cursor-pointer
      hover:bg-primary-dark hover:-translate-y-1 transition-all duration-200 animate-shadow-pulse
        lg:text-xl lg:font-black">
                 <img src="<?php echo plugin_dir_url(__FILE__) . '../assets/icons/upload.svg'; ?>" alt="Upload" class="fill-white w-auto h-8">
                 <span class="text-white">Upload your SVG logo</span>
             </div>
+
+            <a target="_blank" href="https://danmarshall.github.io/google-font-to-svg-path/"
+                class=" bg-white border-2 border-primary text-primary rounded-lg p-4 mb-4 flex items-center gap-2 cursor-pointer
+      hover:-translate-y-1 transition-all duration-200
+       lg:text-xl lg:font-black">
+                <img src="<?php echo plugin_dir_url(__FILE__) . '../assets/icons/create.svg'; ?>" alt="Upload" class="w-auto h-8">
+                <span>Or create one</span>
+            </a>
+
         </div>
     </div>
 

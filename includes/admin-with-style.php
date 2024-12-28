@@ -26,27 +26,85 @@
     </div>
 
     <!-- Where should we show the loader? -->
-    <div class="flex flex-col gap-4">
-        <h2 class="text-2xl md:text-3xl font-bold text-primary mt-8">Where should we show the loader?</h2>
-        <p class="text-lg text-almost-black">Select the pages where you want to show the loader</p>
+    <div class="flex flex-col gap-8 mt-12">
+        <!-- Location Settings -->
+        <div class="flex flex-col gap-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-primary">Where should we show the loader?</h2>
+            <p class="text-lg text-almost-black mb-4">Select the pages where you want to show the loader</p>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <label class="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" name="show_on_home" class="w-5 h-5 accent-primary">
+                    <span class="text-lg">Homepage</span>
+                </label>
 
+                <label class="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" name="show_on_posts" class="w-5 h-5 accent-primary">
+                    <span class="text-lg">All Posts</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" name="show_on_pages" class="w-5 h-5 accent-primary">
+                    <span class="text-lg">All Pages</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" name="show_on_archives" class="w-5 h-5 accent-primary">
+                    <span class="text-lg">Archive Pages</span>
+                </label>
+
+                <label class="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" name="show_on_search" class="w-5 h-5 accent-primary">
+                    <span class="text-lg">Search Results</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Frequency Settings -->
+        <div class="flex flex-col gap-4 mt-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-primary">How often should we show the loader?</h2>
+            <p class="text-lg text-almost-black mb-4">Choose how frequently visitors will see the loading animation</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                <label class="flex flex-col gap-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="frequency" value="every-visit" class="w-5 h-5 accent-primary">
+                        <span class="text-lg font-medium">Every Visit</span>
+                    </div>
+                    <p class="text-gray-600 ml-8">Show the loader on every page load</p>
+                </label>
+
+                <label class="flex flex-col gap-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="frequency" value="once-per-session" class="w-5 h-5 accent-primary">
+                        <span class="text-lg font-medium">Once Per Session</span>
+                    </div>
+                    <p class="text-gray-600 ml-8">Show only once when a user starts browsing</p>
+                </label>
+
+                <label class="flex flex-col gap-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="frequency" value="once-per-page" class="w-5 h-5 accent-primary">
+                        <span class="text-lg font-medium">Once Per Page</span>
+                    </div>
+                    <p class="text-gray-600 ml-8">Show once on each unique page</p>
+                </label>
+
+                <label class="flex flex-col gap-2 p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <input type="radio" name="frequency" value="never" class="w-5 h-5 accent-primary">
+                        <span class="text-lg font-medium">Disabled</span>
+                    </div>
+                    <p class="text-gray-600 ml-8">Don't show the loader</p>
+                </label>
+            </div>
+        </div>
     </div>
 
-    <p class="text-lg text-almost-black">Select when we should show the loader</p>
-    <div class="flex flex-row gap-4">
-        <select name="pages" id="pages" class="w-full h-full">
-            <option value="on-every-visit">On every visit</option>
-            <option value="once-per-session">Once per session</option>
-            <option value="once-per-page">Once per page</option>
-            <option value="on-every-visit-and-once-per-session">On every visit and once per session</option>
-            <option value="never">Never</option>
-        </select>
-    </div>
-
-    <button class="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer
+    <!-- Save Button -->
+    <button type="submit" class="mt-8 bg-primary text-white px-6 py-3 rounded-lg flex items-center gap-2 cursor-pointer
      hover:bg-primary-dark hover:-translate-y-1 transition-all duration-200
-       lg:text-xl lg:font-black">
-        Save the loader
+       lg:text-xl lg:font-bold">
+        <span>Save Settings</span>
     </button>
 </div>
